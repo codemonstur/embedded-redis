@@ -1,5 +1,6 @@
 package redis.embedded;
 
+import org.apache.commons.io.IOUtils;
 import redis.embedded.exceptions.EmbeddedRedisException;
 
 import java.io.*;
@@ -8,8 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import org.apache.commons.io.IOUtils;
 
 abstract class AbstractRedisInstance implements Redis {
     protected List<String> args = Collections.emptyList();
@@ -23,12 +22,10 @@ abstract class AbstractRedisInstance implements Redis {
         this.port = port;
     }
 
-    @Override
     public boolean isActive() {
         return active;
     }
 
-	@Override
     public synchronized void start() throws EmbeddedRedisException {
         if (active) {
             throw new EmbeddedRedisException("This redis server instance is already running...");
@@ -54,12 +51,17 @@ abstract class AbstractRedisInstance implements Redis {
     private void awaitRedisServerReady() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(redisProcess.getInputStream()));
         try {
+            StringBuffer outputStringBuffer = new StringBuffer();
             String outputLine;
             do {
                 outputLine = reader.readLine();
                 if (outputLine == null) {
                     //Something goes wrong. Stream is ended before server was activated.
-                    throw new RuntimeException("Can't start redis server. Check logs for details.");
+                    throw new RuntimeException("Can't start redis server. Check logs for details. Redis process log: "+outputStringBuffer.toString());
+                }
+                else{
+                    outputStringBuffer.append("\n");
+                    outputStringBuffer.append(outputLine);
                 }
             } while (!outputLine.matches(redisReadyPattern()));
         } finally {
@@ -76,7 +78,6 @@ abstract class AbstractRedisInstance implements Redis {
         return pb;
     }
 
-    @Override
     public synchronized void stop() throws EmbeddedRedisException {
         if (active) {
             if (executor != null && !executor.isShutdown()) {
@@ -96,7 +97,6 @@ abstract class AbstractRedisInstance implements Redis {
         }
     }
 
-    @Override
     public List<Integer> ports() {
         return Arrays.asList(port);
     }

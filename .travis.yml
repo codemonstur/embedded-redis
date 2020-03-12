@@ -1,6 +1,6 @@
 language: java
 
-sudo: false # faster builds
+dist: trusty
 
 jdk:
   - oraclejdk8
@@ -10,7 +10,6 @@ install:
 
 before_script:
   - pip install --user codecov
-  - curl http://www.jpm4j.org/install/script | sh
 
 script:
   - mvn -U -B -V test --fail-at-end -Dsource.skip=true -Dmaven.javadoc.skip=true
