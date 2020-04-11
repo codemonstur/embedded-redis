@@ -1,6 +1,8 @@
 package redis.embedded;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import redis.embedded.exceptions.EmbeddedRedisException;
 
 import java.io.*;
@@ -11,9 +13,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 abstract class AbstractRedisInstance implements Redis {
+
+    private static Log log = LogFactory.getLog(AbstractRedisInstance.class);
+
     protected List<String> args = Collections.emptyList();
     private volatile boolean active = false;
-	private Process redisProcess;
+    private Process redisProcess;
     private final int port;
 
     private ExecutorService executor;
@@ -32,12 +37,17 @@ abstract class AbstractRedisInstance implements Redis {
         }
         try {
             redisProcess = createRedisProcessBuilder().start();
+            installExitHook();
             logErrors();
             awaitRedisServerReady();
             active = true;
         } catch (IOException e) {
             throw new EmbeddedRedisException("Failed to start Redis instance", e);
         }
+    }
+
+    private void installExitHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(this::stop, "RedisInstanceCleaner"));
     }
 
     private void logErrors() {
@@ -57,9 +67,8 @@ abstract class AbstractRedisInstance implements Redis {
                 outputLine = reader.readLine();
                 if (outputLine == null) {
                     //Something goes wrong. Stream is ended before server was activated.
-                    throw new RuntimeException("Can't start redis server. Check logs for details. Redis process log: "+outputStringBuffer.toString());
-                }
-                else{
+                    throw new RuntimeException("Can't start redis server. Check logs for details. Redis process log: " + outputStringBuffer.toString());
+                } else {
                     outputStringBuffer.append("\n");
                     outputStringBuffer.append(outputLine);
                 }
@@ -80,11 +89,14 @@ abstract class AbstractRedisInstance implements Redis {
 
     public synchronized void stop() throws EmbeddedRedisException {
         if (active) {
+            log.info("Stopping redis server...");
+
             if (executor != null && !executor.isShutdown()) {
                 executor.shutdown();
             }
             redisProcess.destroy();
             tryWaitFor();
+            log.info("Redis exited");
             active = false;
         }
     }
