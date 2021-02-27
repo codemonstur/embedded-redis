@@ -49,7 +49,6 @@ public class RedisClusterBuilder {
         return this;
     }
 
-
     public RedisClusterBuilder ephemeral() {
         ephemeralSentinels();
         ephemeralServers();
@@ -118,7 +117,7 @@ public class RedisClusterBuilder {
     private Redis buildSentinel() {
         sentinelBuilder.reset();
         sentinelBuilder.port(nextSentinelPort());
-        for(ReplicationGroup g : groups) {
+        for (ReplicationGroup g : groups) {
             sentinelBuilder.masterName(g.masterName);
             sentinelBuilder.masterPort(g.masterPort);
             sentinelBuilder.quorumSize(quorumSize);

@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class JarUtil {
 
-    public static File extractExecutableFromJar(String executable) throws IOException {
+    public static File extractExecutableFromJar(final String executable) throws IOException {
         File tmpDir = Files.createTempDir();
         tmpDir.deleteOnExit();
 

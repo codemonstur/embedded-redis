@@ -123,7 +123,7 @@ public class RedisServerTest {
 
 	@Test
 	public void testAwaitRedisServerReady() throws Exception {
-		String readyPattern =  RedisServer.builder().build().redisReadyPattern();
+		String readyPattern =  RedisServer.builder().build().readyPattern.pattern();
 
 		assertReadyPattern(new BufferedReader(
 						new InputStreamReader(getClass()

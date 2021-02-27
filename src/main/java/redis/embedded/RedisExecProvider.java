@@ -1,7 +1,5 @@
 package redis.embedded;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 import redis.embedded.util.Architecture;
 import redis.embedded.util.JarUtil;
 import redis.embedded.util.OS;
@@ -9,11 +7,12 @@ import redis.embedded.util.OsArchitecture;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 public class RedisExecProvider {
     
-    private final Map<OsArchitecture, String> executables = Maps.newHashMap();
+    private final Map<OsArchitecture, String> executables = new HashMap<>();
 
     public static RedisExecProvider defaultProvider() {
         return new RedisExecProvider();
@@ -35,15 +34,13 @@ public class RedisExecProvider {
     }
 
     public RedisExecProvider override(OS os, String executable) {
-        Preconditions.checkNotNull(executable);
         for (Architecture arch : Architecture.values()) {
-            override(os, arch, executable);
+            executables.put(new OsArchitecture(os, arch), executable);
         }
         return this;
     }
 
     public RedisExecProvider override(OS os, Architecture arch, String executable) {
-        Preconditions.checkNotNull(executable);
         executables.put(new OsArchitecture(os, arch), executable);
         return this;
     }
@@ -51,13 +48,13 @@ public class RedisExecProvider {
     public File get() throws IOException {
         OsArchitecture osArch = OsArchitecture.detect();
         String executablePath = executables.get(osArch);
-         return fileExists(executablePath) ?
+        return fileExists(executablePath) ?
                 new File(executablePath) :
                 JarUtil.extractExecutableFromJar(executablePath);
         
     }
 
-    private boolean fileExists(String executablePath) {
+    private static boolean fileExists(String executablePath) {
         return new File(executablePath).exists();
     }
 }

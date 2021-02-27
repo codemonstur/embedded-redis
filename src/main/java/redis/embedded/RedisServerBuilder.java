@@ -17,7 +17,7 @@ public class RedisServerBuilder {
 
     private File executable;
     private RedisExecProvider redisExecProvider = RedisExecProvider.defaultProvider();
-    private String bind="127.0.0.1";
+    private String bind = "127.0.0.1";
     private int port = 6379;
     private InetSocketAddress slaveOf;
     private String redisConf;
@@ -29,27 +29,27 @@ public class RedisServerBuilder {
         return this;
     }
 
-    public RedisServerBuilder bind(String bind) {
+    public RedisServerBuilder bind(final String bind) {
         this.bind = bind;
         return this;
     }
 
-    public RedisServerBuilder port(int port) {
+    public RedisServerBuilder port(final int port) {
         this.port = port;
         return this;
     }
 
-    public RedisServerBuilder slaveOf(String hostname, int port) {
+    public RedisServerBuilder slaveOf(final String hostname, final int port) {
         this.slaveOf = new InetSocketAddress(hostname, port);
         return this;
     }
 
-    public RedisServerBuilder slaveOf(InetSocketAddress slaveOf) {
+    public RedisServerBuilder slaveOf(final InetSocketAddress slaveOf) {
         this.slaveOf = slaveOf;
         return this;
     }
 
-    public RedisServerBuilder configFile(String redisConf) {
+    public RedisServerBuilder configFile(final String redisConf) {
         if (redisConfigBuilder != null) {
             throw new RedisBuildingException("Redis configuration is already partially build using setting(String) method!");
         }
@@ -57,7 +57,7 @@ public class RedisServerBuilder {
         return this;
     }
 
-    public RedisServerBuilder setting(String configLine) {
+    public RedisServerBuilder setting(final String configLine) {
         if (redisConf != null) {
             throw new RedisBuildingException("Redis configuration is already set using redis conf file!");
         }
@@ -72,10 +72,10 @@ public class RedisServerBuilder {
     }
 
     public RedisServer build() {
-        setting("bind "+bind);
+        setting("bind " + bind);
         tryResolveConfAndExec();
         List<String> args = buildCommandArgs();
-        return new RedisServer(args, port);
+        return new RedisServer(port, args);
     }
 
     public void reset() {

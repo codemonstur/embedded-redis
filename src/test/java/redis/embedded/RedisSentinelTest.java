@@ -71,7 +71,7 @@ public class RedisSentinelTest {
 
     @Test
     public void testAwaitRedisSentinelReady() throws Exception {
-        String readyPattern =  RedisSentinel.builder().build().redisReadyPattern();
+        String readyPattern = RedisSentinel.builder().build().readyPattern.pattern();
 
         assertReadyPattern(new BufferedReader(
                         new InputStreamReader(getClass()

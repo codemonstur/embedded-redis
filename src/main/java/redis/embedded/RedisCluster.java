@@ -18,13 +18,13 @@ public class RedisCluster implements Redis {
 
     @Override
     public boolean isActive() {
-        for(Redis redis : sentinels) {
-            if(!redis.isActive()) {
+        for (Redis redis : sentinels) {
+            if (!redis.isActive()) {
                 return false;
             }
         }
-        for(Redis redis : servers) {
-            if(!redis.isActive()) {
+        for (Redis redis : servers) {
+            if (!redis.isActive()) {
                 return false;
             }
         }
@@ -33,20 +33,20 @@ public class RedisCluster implements Redis {
 
     @Override
     public void start() throws EmbeddedRedisException {
-        for(Redis redis : sentinels) {
+        for (Redis redis : sentinels) {
             redis.start();
         }
-        for(Redis redis : servers) {
+        for (Redis redis : servers) {
             redis.start();
         }
     }
 
     @Override
     public void stop() throws EmbeddedRedisException {
-        for(Redis redis : sentinels) {
+        for (Redis redis : sentinels) {
             redis.stop();
         }
-        for(Redis redis : servers) {
+        for (Redis redis : servers) {
             redis.stop();
         }
     }
@@ -65,7 +65,7 @@ public class RedisCluster implements Redis {
 
     public List<Integer> sentinelPorts() {
         List<Integer> ports = new ArrayList<Integer>();
-        for(Redis redis : sentinels) {
+        for (Redis redis : sentinels) {
             ports.addAll(redis.ports());
         }
         return ports;
@@ -77,7 +77,7 @@ public class RedisCluster implements Redis {
 
     public List<Integer> serverPorts() {
         List<Integer> ports = new ArrayList<Integer>();
-        for(Redis redis : servers) {
+        for (Redis redis : servers) {
             ports.addAll(redis.ports());
         }
         return ports;

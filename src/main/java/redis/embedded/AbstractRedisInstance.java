@@ -1,142 +1,72 @@
 package redis.embedded;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import redis.embedded.exceptions.EmbeddedRedisException;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
+
+import static redis.embedded.util.IOUtils.*;
 
 abstract class AbstractRedisInstance implements Redis {
 
-    private static Log log = LogFactory.getLog(AbstractRedisInstance.class);
+    public final Pattern readyPattern;
+    public final int port;
 
     protected List<String> args = Collections.emptyList();
+
     private volatile boolean active = false;
     private Process redisProcess;
-    private final int port;
 
-    private ExecutorService executor;
-
-    protected AbstractRedisInstance(int port) {
+    protected AbstractRedisInstance(final int port, final String readyPattern) {
         this.port = port;
-    }
-
-    public boolean isActive() {
-        return active;
+        this.readyPattern = Pattern.compile(readyPattern);
     }
 
     public synchronized void start() throws EmbeddedRedisException {
-        if (active) {
-            throw new EmbeddedRedisException("This redis server instance is already running...");
-        }
+        if (active) return;
+
         try {
-            redisProcess = createRedisProcessBuilder().start();
-            installExitHook();
-            logErrors();
-            awaitRedisServerReady();
+            redisProcess = new ProcessBuilder(args)
+                .directory(new File(args.get(0)).getParentFile())
+                .start();
+            addShutdownHook("RedisInstanceCleaner", this::stop);
+            logStream(redisProcess.getErrorStream(), System.out::println);
+            awaitServerReady();
+
             active = true;
         } catch (IOException e) {
             throw new EmbeddedRedisException("Failed to start Redis instance", e);
         }
     }
 
-    private void installExitHook() {
-        Runtime.getRuntime().addShutdownHook(new Thread(this::stop, "RedisInstanceCleaner"));
-    }
-
-    private void logErrors() {
-        final InputStream errorStream = redisProcess.getErrorStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(errorStream));
-        Runnable printReaderTask = new PrintReaderRunnable(reader);
-        executor = Executors.newSingleThreadExecutor();
-        executor.submit(printReaderTask);
-    }
-
-    private void awaitRedisServerReady() throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(redisProcess.getInputStream()));
-        try {
-            StringBuffer outputStringBuffer = new StringBuffer();
-            String outputLine;
-            do {
-                outputLine = reader.readLine();
-                if (outputLine == null) {
-                    //Something goes wrong. Stream is ended before server was activated.
-                    throw new RuntimeException("Can't start redis server. Check logs for details. Redis process log: " + outputStringBuffer.toString());
-                } else {
-                    outputStringBuffer.append("\n");
-                    outputStringBuffer.append(outputLine);
-                }
-            } while (!outputLine.matches(redisReadyPattern()));
-        } finally {
-            IOUtils.closeQuietly(reader);
-        }
-    }
-
-    protected abstract String redisReadyPattern();
-
-    private ProcessBuilder createRedisProcessBuilder() {
-        File executable = new File(args.get(0));
-        ProcessBuilder pb = new ProcessBuilder(args);
-        pb.directory(executable.getParentFile());
-        return pb;
+    private void awaitServerReady() throws IOException {
+        final StringBuilder log = new StringBuilder();
+        if (!findMatchInStream(redisProcess.getInputStream(), readyPattern, log))
+            throw new EmbeddedRedisException("Can't start redis server. Check logs for details. Redis process log: " + log.toString());
     }
 
     public synchronized void stop() throws EmbeddedRedisException {
-        if (active) {
-            log.info("Stopping redis server...");
+        if (!active) return;
 
-            if (executor != null && !executor.isShutdown()) {
-                executor.shutdown();
-            }
-            redisProcess.destroy();
-            tryWaitFor();
-            log.info("Redis exited");
-            active = false;
-        }
-    }
-
-    private void tryWaitFor() {
         try {
+            redisProcess.destroy();
             redisProcess.waitFor();
+            active = false;
         } catch (InterruptedException e) {
             throw new EmbeddedRedisException("Failed to stop redis instance", e);
         }
+    }
+
+    public boolean isActive() {
+        return active;
     }
 
     public List<Integer> ports() {
         return Arrays.asList(port);
     }
 
-    private static class PrintReaderRunnable implements Runnable {
-        private final BufferedReader reader;
-
-        private PrintReaderRunnable(BufferedReader reader) {
-            this.reader = reader;
-        }
-
-        public void run() {
-            try {
-                readLines();
-            } finally {
-                IOUtils.closeQuietly(reader);
-            }
-        }
-
-        public void readLines() {
-            try {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    System.out.println(line);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 }
