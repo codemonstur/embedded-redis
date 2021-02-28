@@ -15,7 +15,7 @@ public interface ExecutableProvider {
     String getExecutableFor(OsArchitecture osa);
 
     default File get() throws IOException {
-        final String executablePath = getExecutableFor(detect());
+        final String executablePath = getExecutableFor(detectOSandArchitecture());
         final File executable = new File(executablePath);
         return executable.isFile() ? executable : writeResourceToExecutableFile(executablePath);
     }
