@@ -28,8 +28,8 @@ public class RedisServerTest {
 		redisServer.stop();
 	}
 
-	@Test(expected = RuntimeException.class)
-	public void shouldNotAllowMultipleRunsWithoutStop() throws IOException {
+	@Test
+	public void shouldAllowMultipleRunsWithoutStop() throws IOException {
 		try {
 			redisServer = new RedisServer(6379);
 			redisServer.start();
