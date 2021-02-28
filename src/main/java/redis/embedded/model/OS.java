@@ -1,6 +1,6 @@
 package redis.embedded.model;
 
-import redis.embedded.exceptions.UnknownOSName;
+import redis.embedded.error.UnknownOSName;
 
 import java.util.function.Supplier;
 

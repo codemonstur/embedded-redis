@@ -1,6 +1,6 @@
 package redis.embedded.model;
 
-import redis.embedded.exceptions.OsArchitectureNotFound;
+import redis.embedded.error.OsArchitectureNotFound;
 
 import java.io.IOException;
 import java.util.function.Predicate;

@@ -1,15 +1,15 @@
-package redis.embedded;
+package redis.embedded.core;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 
-public enum PortProviders {;
+public interface PortProvider {
+    int get();
 
-    public static Supplier<Integer> newEphemeralPortProvider() {
+    static PortProvider newEphemeralPortProvider() {
         return () -> {
             try (final ServerSocket socket = new ServerSocket(0)) {
                 socket.setReuseAddress(false);
@@ -20,7 +20,7 @@ public enum PortProviders {;
         };
     }
 
-    public static Supplier<Integer> newPredefinedPortProvider(final Collection<Integer> ports) {
+    static PortProvider newPredefinedPortProvider(final Collection<Integer> ports) {
         final Iterator<Integer> iterator = ports.iterator();
         return () -> {
             if (!iterator.hasNext())
@@ -29,10 +29,10 @@ public enum PortProviders {;
         };
     }
 
-    public static Supplier<Integer> newSequencePortProvider() {
+    static PortProvider newSequencePortProvider() {
         return newSequencePortProvider(26379);
     }
-    public static Supplier<Integer> newSequencePortProvider(final int start) {
+    static PortProvider newSequencePortProvider(final int start) {
         final AtomicInteger currentPort = new AtomicInteger(start);
         return currentPort::getAndIncrement;
     }

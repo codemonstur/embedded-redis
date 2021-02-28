@@ -1,11 +1,10 @@
 package redis.embedded.ports;
 
 import org.junit.Test;
-
-import java.util.function.Supplier;
+import redis.embedded.core.PortProvider;
 
 import static org.junit.Assert.assertEquals;
-import static redis.embedded.PortProviders.newSequencePortProvider;
+import static redis.embedded.core.PortProvider.newSequencePortProvider;
 
 public class SequencePortProviderTest {
 
@@ -14,7 +13,7 @@ public class SequencePortProviderTest {
         //given
         final int startPort = 10;
         final int portCount = 101;
-        final Supplier<Integer> provider = newSequencePortProvider(startPort);
+        final PortProvider provider = newSequencePortProvider(startPort);
 
         //when
         int max = 0;

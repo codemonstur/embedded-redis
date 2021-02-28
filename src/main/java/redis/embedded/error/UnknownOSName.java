@@ -1,4 +1,4 @@
-package redis.embedded.exceptions;
+package redis.embedded.error;
 
 public class UnknownOSName extends RuntimeException {
     public UnknownOSName(final String name) {

@@ -1,4 +1,4 @@
-package redis.embedded.exceptions;
+package redis.embedded.error;
 
 public class OsArchitectureNotFound extends RuntimeException {
     public OsArchitectureNotFound(final Throwable cause) {

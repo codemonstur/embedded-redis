@@ -1,4 +1,6 @@
-package redis.embedded;
+package redis.embedded.core;
+
+import redis.embedded.RedisSentinel;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static redis.embedded.Redis.DEFAULT_REDIS_PORT;
+import static redis.embedded.core.ExecutableProvider.newRedis2_8_19Provider;
 
 public final class RedisSentinelBuilder {
     private static final String
@@ -19,10 +23,10 @@ public final class RedisSentinelBuilder {
         LINE_PORT = "port %d";
 
     private File executable;
-    private RedisExecProvider redisExecProvider = new RedisExecProvider();
+    private ExecutableProvider executableProvider = newRedis2_8_19Provider();
     private String bind = "127.0.0.1";
     private Integer port = 26379;
-    private int masterPort = 6379;
+    private int masterPort = DEFAULT_REDIS_PORT;
     private String masterName = "mymaster";
     private long downAfterMilliseconds = 60000L;
     private long failOverTimeout = 180000L;
@@ -32,8 +36,8 @@ public final class RedisSentinelBuilder {
 
     private StringBuilder redisConfigBuilder;
 
-    public RedisSentinelBuilder redisExecProvider(final RedisExecProvider redisExecProvider) {
-        this.redisExecProvider = redisExecProvider;
+    public RedisSentinelBuilder executableProvider(final ExecutableProvider executableProvider) {
+        this.executableProvider = executableProvider;
         return this;
     }
 
@@ -79,7 +83,7 @@ public final class RedisSentinelBuilder {
 
     public RedisSentinelBuilder configFile(final String redisConf) {
         if (redisConfigBuilder != null) {
-            throw new IllegalArgumentException("Redis configuration is already partially build using setting(String) method");
+            throw new IllegalArgumentException("Redis configuration is already partially built using setting(String) method");
         }
         this.sentinelConf = redisConf;
         return this;
@@ -108,7 +112,7 @@ public final class RedisSentinelBuilder {
             if (sentinelConf == null) {
                 resolveSentinelConf();
             }
-            executable = redisExecProvider.get();
+            executable = executableProvider.get();
         } catch (Exception e) {
             throw new IllegalArgumentException("Could not build sentinel instance", e);
         }

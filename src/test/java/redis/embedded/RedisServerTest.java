@@ -3,6 +3,9 @@ package redis.embedded;
 import org.junit.Test;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.embedded.core.ExecutableProvider;
+import redis.embedded.core.ExecutableProviderBuilder;
+import redis.embedded.core.RedisServerBuilder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -57,19 +60,14 @@ public class RedisServerTest {
 		redisServer = new RedisServer(6379);
 		redisServer.start();
 
-		JedisPool pool = null;
-		Jedis jedis = null;
-		try {
-			pool = new JedisPool("localhost", 6379);
-			jedis = pool.getResource();
+		try (final JedisPool pool = new JedisPool("localhost", 6379);
+             final Jedis jedis = pool.getResource()) {
 			jedis.mset("abc", "1", "def", "2");
 
 			assertEquals("1", jedis.mget("abc").get(0));
 			assertEquals("2", jedis.mget("def").get(0));
 			assertNull(jedis.mget("xyz").get(0));
 		} finally {
-			if (jedis != null)
-				pool.returnResource(jedis);
 			redisServer.stop();
 		}
 	}
@@ -98,12 +96,13 @@ public class RedisServerTest {
 
     @Test
     public void shouldOverrideDefaultExecutable() {
-        RedisExecProvider customProvider = new RedisExecProvider()
+        ExecutableProvider customProvider = new ExecutableProviderBuilder()
                 .put(UNIX, x86, "redis-server-2.8.19-32")
                 .put(UNIX, x86_64, "redis-server-2.8.19")
                 .put(WINDOWS, x86, "redis-server-2.8.19.exe")
                 .put(WINDOWS, x86_64, "redis-server-2.8.19.exe")
-                .put(MAC_OS_X, "redis-server-2.8.19");
+                .put(MAC_OS_X, "redis-server-2.8.19")
+                .build();
 
         redisServer = new RedisServerBuilder()
                 .redisExecProvider(customProvider)
@@ -112,11 +111,12 @@ public class RedisServerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldFailWhenBadExecutableGiven() {
-        RedisExecProvider buggyProvider = new RedisExecProvider()
+        ExecutableProvider buggyProvider = new ExecutableProviderBuilder()
                 .put(UNIX, "some")
                 .put(WINDOWS, x86, "some")
                 .put(WINDOWS, x86_64, "some")
-                .put(MAC_OS_X, "some");
+                .put(MAC_OS_X, "some")
+                .build();
 
         redisServer = new RedisServerBuilder()
                 .redisExecProvider(buggyProvider)
@@ -125,12 +125,12 @@ public class RedisServerTest {
 
 	@Test
 	public void testAwaitRedisServerReady() throws IOException {
-		assertReadyPattern("/redis-2.x-standalone-startup-output.txt", SERVER_READY_PATTERN);
-        assertReadyPattern("/redis-3.x-standalone-startup-output.txt", SERVER_READY_PATTERN);
-        assertReadyPattern("/redis-4.x-standalone-startup-output.txt", SERVER_READY_PATTERN);
+		testReadyPattern("/redis-2.x-standalone-startup-output.txt", SERVER_READY_PATTERN);
+        testReadyPattern("/redis-3.x-standalone-startup-output.txt", SERVER_READY_PATTERN);
+        testReadyPattern("/redis-4.x-standalone-startup-output.txt", SERVER_READY_PATTERN);
 	}
 
-	private static void assertReadyPattern(final String resourcePath, final Pattern readyPattern) throws IOException {
+	private static void testReadyPattern(final String resourcePath, final Pattern readyPattern) throws IOException {
         final InputStream in = RedisServerTest.class.getResourceAsStream(resourcePath);
         assertNotNull(in);
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {

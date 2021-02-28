@@ -53,7 +53,7 @@ RedisServer redisServer = new RedisServer(customProvider, 6379);
 You can also use fluent API to create RedisServer:
 ```java
 RedisServer redisServer = RedisServer.builder()
-  .redisExecProvider(customRedisProvider)
+  .executableProvider(customRedisProvider)
   .port(6379)
   .slaveOf("locahost", 6378)
   .configFile("/path/to/your/redis.conf")
@@ -63,7 +63,7 @@ RedisServer redisServer = RedisServer.builder()
 Or even create simple redis.conf file from scratch:
 ```java
 RedisServer redisServer = RedisServer.builder()
-  .redisExecProvider(customRedisProvider)
+  .executableProvider(customRedisProvider)
   .port(6379)
   .setting("bind 127.0.0.1") // good for local development on Windows to prevent security popups
   .slaveOf("locahost", 6378)
@@ -127,7 +127,7 @@ public class SomeIntegrationTestThatRequiresRedis {
     final List<Integer> sentinels = Arrays.asList(26739, 26912);
     final List<Integer> group1 = Arrays.asList(6667, 6668);
     final List<Integer> group2 = Arrays.asList(6387, 6379);
-    //creates a cluster with 3 sentinels, quorum size of 2 and 3 replication groups, each with one master and one slave
+    //creates a cluster with 2 sentinels, quorum size of 2 and 3 replication groups, each with one master and one slave
     cluster = RedisCluster.builder().sentinelPorts(sentinels).quorumSize(2)
                     .serverPorts(group1).replicationGroup("master1", 1)
                     .serverPorts(group2).replicationGroup("master2", 1)

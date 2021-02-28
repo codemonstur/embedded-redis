@@ -1,10 +1,10 @@
 package redis.embedded;
 
-import java.util.List;
-import java.util.regex.Pattern;
+import redis.embedded.core.RedisSentinelBuilder;
 
-public class RedisSentinel extends RedisInstance {
-    public static final Pattern SENTINEL_READY_PATTERN = Pattern.compile(".*Sentinel (runid|ID) is.*");
+import java.util.List;
+
+public final class RedisSentinel extends RedisInstance {
 
     public RedisSentinel(final int port, final List<String> args) {
         super(port, args, SENTINEL_READY_PATTERN);

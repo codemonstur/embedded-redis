@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 import static redis.embedded.util.IO.*;
 
-abstract class RedisInstance implements Redis {
+public abstract class RedisInstance implements Redis {
 
     private final Pattern readyPattern;
     private final int port;
@@ -36,14 +36,14 @@ abstract class RedisInstance implements Redis {
 
             active = true;
         } catch (IOException e) {
-            throw new IOException("Failed to start Redis instance", e);
+            throw new IOException("Failed to start Redis service", e);
         }
     }
 
     private void awaitServerReady() throws IOException {
         final StringBuilder log = new StringBuilder();
         if (!findMatchInStream(process.getInputStream(), readyPattern, log))
-            throw new IOException("Can't start redis server. Check logs for details. Redis process log: " + log.toString());
+            throw new IOException("Ready pattern not found in log. Startup log: " + log.toString());
     }
 
     public synchronized void stop() throws IOException {
@@ -54,7 +54,7 @@ abstract class RedisInstance implements Redis {
             process.waitFor();
             active = false;
         } catch (InterruptedException e) {
-            throw new IOException("Failed to stop redis instance", e);
+            throw new IOException("Failed to stop redis service", e);
         }
     }
 

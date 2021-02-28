@@ -1,16 +1,18 @@
 package redis.embedded;
 
+import redis.embedded.core.RedisClusterBuilder;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class RedisCluster implements Redis {
+public final class RedisCluster implements Redis {
 
     private final List<Redis> sentinels = new LinkedList<>();
     private final List<Redis> servers = new LinkedList<>();
 
-    RedisCluster(final List<Redis> sentinels, final List<Redis> servers) {
+    public RedisCluster(final List<Redis> sentinels, final List<Redis> servers) {
         this.servers.addAll(servers);
         this.sentinels.addAll(sentinels);
     }
@@ -57,7 +59,7 @@ public class RedisCluster implements Redis {
 
     @Override
     public List<Integer> ports() {
-        final List<Integer> ports = new ArrayList<Integer>();
+        final List<Integer> ports = new ArrayList<>();
         ports.addAll(sentinelPorts());
         ports.addAll(serverPorts());
         return ports;
@@ -68,7 +70,7 @@ public class RedisCluster implements Redis {
     }
 
     public List<Integer> sentinelPorts() {
-        final List<Integer> ports = new ArrayList<Integer>();
+        final List<Integer> ports = new ArrayList<>();
         for (final Redis redis : sentinels) {
             ports.addAll(redis.ports());
         }
@@ -80,14 +82,14 @@ public class RedisCluster implements Redis {
     }
 
     public List<Integer> serverPorts() {
-        final List<Integer> ports = new ArrayList<Integer>();
+        final List<Integer> ports = new ArrayList<>();
         for (final Redis redis : servers) {
             ports.addAll(redis.ports());
         }
         return ports;
     }
 
-    public static RedisClusterBuilder builder() {
+    public static RedisClusterBuilder newRedisCluster() {
         return new RedisClusterBuilder();
     }
 }

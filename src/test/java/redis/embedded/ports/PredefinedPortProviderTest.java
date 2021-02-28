@@ -1,15 +1,15 @@
 package redis.embedded.ports;
 
 import org.junit.Test;
+import redis.embedded.core.PortProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
-import static redis.embedded.PortProviders.newPredefinedPortProvider;
+import static redis.embedded.core.PortProvider.newPredefinedPortProvider;
 
 public class PredefinedPortProviderTest {
 
@@ -17,7 +17,7 @@ public class PredefinedPortProviderTest {
     public void nextShouldGiveNextPortFromAssignedList() {
         //given
         final Collection<Integer> ports = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-        final Supplier<Integer> provider = newPredefinedPortProvider(ports);
+        final PortProvider provider = newPredefinedPortProvider(ports);
 
         //when
         final List<Integer> returnedPorts = new ArrayList<Integer>();
@@ -33,7 +33,7 @@ public class PredefinedPortProviderTest {
     public void nextShouldThrowExceptionWhenRunOutsOfPorts() {
         //given
         final Collection<Integer> ports = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-        final Supplier<Integer> provider = newPredefinedPortProvider(ports);
+        final PortProvider provider = newPredefinedPortProvider(ports);
 
         //when
         for (int i = 0; i < ports.size(); i++) {

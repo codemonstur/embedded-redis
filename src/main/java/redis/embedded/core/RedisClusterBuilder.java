@@ -1,12 +1,16 @@
-package redis.embedded;
+package redis.embedded.core;
+
+import redis.embedded.Redis;
+import redis.embedded.RedisCluster;
+import redis.embedded.RedisServer;
+import redis.embedded.model.ReplicationGroup;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Supplier;
 
-import static redis.embedded.PortProviders.*;
+import static redis.embedded.core.PortProvider.*;
 
 public final class RedisClusterBuilder {
 
@@ -14,8 +18,8 @@ public final class RedisClusterBuilder {
     private RedisServerBuilder serverBuilder = new RedisServerBuilder();
     private int sentinelCount = 1;
     private int quorumSize = 1;
-    private Supplier<Integer> sentinelPortProvider = newSequencePortProvider(26379);
-    private Supplier<Integer> replicationGroupPortProvider = newSequencePortProvider(6379);
+    private PortProvider sentinelPortProvider = newSequencePortProvider(26379);
+    private PortProvider replicationGroupPortProvider = newSequencePortProvider(6379);
     private final List<ReplicationGroup> groups = new LinkedList<ReplicationGroup>();
 
     public RedisClusterBuilder withSentinelBuilder(final RedisSentinelBuilder sentinelBuilder) {
@@ -130,17 +134,4 @@ public final class RedisClusterBuilder {
         return sentinelPortProvider.get();
     }
 
-    private static class ReplicationGroup {
-        private final String masterName;
-        private final int masterPort;
-        private final List<Integer> slavePorts = new LinkedList<>();
-
-        private ReplicationGroup(final String masterName, int slaveCount, final Supplier<Integer> portProvider) {
-            this.masterName = masterName;
-            masterPort = portProvider.get();
-            while (slaveCount-- > 0) {
-                slavePorts.add(portProvider.get());
-            }
-        }
-    }
 }

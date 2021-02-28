@@ -1,13 +1,13 @@
 package redis.embedded.ports;
 
 import org.junit.Test;
+import redis.embedded.core.PortProvider;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
-import static redis.embedded.PortProviders.newEphemeralPortProvider;
+import static redis.embedded.core.PortProvider.newEphemeralPortProvider;
 
 public class EphemeralPortProviderTest {
 
@@ -15,7 +15,7 @@ public class EphemeralPortProviderTest {
     public void nextShouldGiveNextFreeEphemeralPort() {
         //given
         final int portCount = 20;
-        final Supplier<Integer> provider = newEphemeralPortProvider();
+        final PortProvider provider = newEphemeralPortProvider();
 
         //when
         final List<Integer> ports = new ArrayList<Integer>();

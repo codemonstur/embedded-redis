@@ -1,4 +1,6 @@
-package redis.embedded;
+package redis.embedded.core;
+
+import redis.embedded.RedisServer;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,22 +10,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static redis.embedded.Redis.DEFAULT_REDIS_PORT;
+import static redis.embedded.core.ExecutableProvider.newRedis2_8_19Provider;
 
 public final class RedisServerBuilder {
-    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
-    private static final String CONF_FILENAME = "embedded-redis-server";
+    private static final String
+        LINE_SEPARATOR = System.getProperty("line.separator"),
+        CONF_FILENAME = "embedded-redis-server";
 
     private File executable;
-    private RedisExecProvider redisExecProvider = new RedisExecProvider();
+    private ExecutableProvider executableProvider = newRedis2_8_19Provider();
     private String bind = "127.0.0.1";
-    private int port = 6379;
+    private int port = DEFAULT_REDIS_PORT;
     private InetSocketAddress slaveOf;
     private String redisConf;
 
     private StringBuilder redisConfigBuilder;
 
-    public RedisServerBuilder redisExecProvider(RedisExecProvider redisExecProvider) {
-        this.redisExecProvider = redisExecProvider;
+    public RedisServerBuilder redisExecProvider(ExecutableProvider executableProvider) {
+        this.executableProvider = executableProvider;
         return this;
     }
 
@@ -49,7 +54,7 @@ public final class RedisServerBuilder {
 
     public RedisServerBuilder configFile(final String redisConf) {
         if (redisConfigBuilder != null) {
-            throw new IllegalArgumentException("Redis configuration is already partially build using setting(String) method");
+            throw new IllegalArgumentException("Redis configuration is already partially built using setting(String) method");
         }
         this.redisConf = redisConf;
         return this;
@@ -119,7 +124,7 @@ public final class RedisServerBuilder {
         }
 
         try {
-            executable = redisExecProvider.get();
+            executable = executableProvider.get();
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to resolve executable", e);
         }

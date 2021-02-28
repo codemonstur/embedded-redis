@@ -25,9 +25,6 @@ public enum IO {;
         return command;
     }
 
-    public interface CheckedRunnable {
-        void run() throws Exception;
-    }
     public static Runnable checkedToRuntime(final CheckedRunnable runnable) {
         return () -> {
             try {
@@ -44,7 +41,7 @@ public enum IO {;
 
     public static void logStream(final InputStream stream, final Consumer<String> logConsumer) {
         new Thread(() -> {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+            try (final BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
                 String line; while ((line = reader.readLine()) != null) {
                     logConsumer.accept(line);
                 }
