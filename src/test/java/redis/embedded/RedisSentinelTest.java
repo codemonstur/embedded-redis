@@ -1,25 +1,28 @@
 package redis.embedded;
 
-import com.google.common.collect.Sets;
 import org.junit.Test;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
+import static redis.embedded.RedisSentinel.SENTINEL_READY_PATTERN;
+import static redis.embedded.util.Collections.newHashSet;
 
 public class RedisSentinelTest {
     private RedisSentinel sentinel;
     private RedisServer server;
 
     @Test(timeout = 3000L)
-    public void testSimpleRun() throws Exception {
+    public void testSimpleRun() throws InterruptedException, IOException {
         server = new RedisServer();
-        sentinel = RedisSentinel.builder().build();
+        sentinel = RedisSentinel.newRedisSentinel().build();
         sentinel.start();
         server.start();
         TimeUnit.SECONDS.sleep(1);
@@ -28,8 +31,8 @@ public class RedisSentinelTest {
     }
 
     @Test
-    public void shouldAllowSubsequentRuns() throws Exception {
-        sentinel = RedisSentinel.builder().build();
+    public void shouldAllowSubsequentRuns() throws IOException {
+        sentinel = RedisSentinel.newRedisSentinel().build();
         sentinel.start();
         sentinel.stop();
 
@@ -41,10 +44,10 @@ public class RedisSentinelTest {
     }
 
     @Test
-    public void testSimpleOperationsAfterRun() throws Exception {
+    public void testSimpleOperationsAfterRun() throws InterruptedException, IOException {
         //given
         server = new RedisServer();
-        sentinel = RedisSentinel.builder().build();
+        sentinel = RedisSentinel.newRedisSentinel().build();
         server.start();
         sentinel.start();
         TimeUnit.SECONDS.sleep(1);
@@ -53,7 +56,7 @@ public class RedisSentinelTest {
         JedisSentinelPool pool = null;
         Jedis jedis = null;
         try {
-            pool = new JedisSentinelPool("mymaster", Sets.newHashSet("localhost:26379"));
+            pool = new JedisSentinelPool("mymaster", newHashSet("localhost:26379"));
             jedis = pool.getResource();
             jedis.mset("abc", "1", "def", "2");
 
@@ -71,32 +74,21 @@ public class RedisSentinelTest {
 
     @Test
     public void testAwaitRedisSentinelReady() throws Exception {
-        String readyPattern = RedisSentinel.builder().build().readyPattern.pattern();
-
-        assertReadyPattern(new BufferedReader(
-                        new InputStreamReader(getClass()
-                                .getClassLoader()
-                                .getResourceAsStream("redis-2.x-sentinel-startup-output.txt"))),
-                readyPattern);
-
-        assertReadyPattern(new BufferedReader(
-                        new InputStreamReader(getClass()
-                                .getClassLoader()
-                                .getResourceAsStream("redis-3.x-sentinel-startup-output.txt"))),
-                readyPattern);
-
-        assertReadyPattern(new BufferedReader(
-                        new InputStreamReader(getClass()
-                                .getClassLoader()
-                                .getResourceAsStream("redis-4.x-sentinel-startup-output.txt"))),
-                readyPattern);
+        assertReadyPattern("/redis-2.x-sentinel-startup-output.txt", SENTINEL_READY_PATTERN);
+        assertReadyPattern("/redis-3.x-sentinel-startup-output.txt", SENTINEL_READY_PATTERN);
+        assertReadyPattern("/redis-4.x-sentinel-startup-output.txt", SENTINEL_READY_PATTERN);
     }
 
-    private void assertReadyPattern(BufferedReader reader, String readyPattern) throws IOException {
-        String outputLine;
-        do {
-            outputLine = reader.readLine();
-            assertNotNull(outputLine);
-        } while (!outputLine.matches(readyPattern));
+    private static void assertReadyPattern(final String resourcePath, final Pattern readyPattern) throws IOException {
+        final InputStream in = RedisServerTest.class.getResourceAsStream(resourcePath);
+        assertNotNull(in);
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+            String line;
+            do {
+                line = reader.readLine();
+                assertNotNull(line);
+            } while (!readyPattern.matcher(line).matches());
+        }
     }
+
 }

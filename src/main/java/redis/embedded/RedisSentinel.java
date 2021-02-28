@@ -1,14 +1,15 @@
 package redis.embedded;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
-public class RedisSentinel extends AbstractRedisInstance {
-    public RedisSentinel(final List<String> args, final int port) {
-        super(port, ".*Sentinel (runid|ID) is.*");
-        this.args = new ArrayList<>(args);
+public class RedisSentinel extends RedisInstance {
+    public static final Pattern SENTINEL_READY_PATTERN = Pattern.compile(".*Sentinel (runid|ID) is.*");
+
+    public RedisSentinel(final int port, final List<String> args) {
+        super(port, args, SENTINEL_READY_PATTERN);
     }
 
-    public static RedisSentinelBuilder builder() { return new RedisSentinelBuilder(); }
+    public static RedisSentinelBuilder newRedisSentinel() { return new RedisSentinelBuilder(); }
 
 }

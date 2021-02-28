@@ -2,29 +2,30 @@ package redis.embedded;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
-public class RedisServer extends AbstractRedisInstance {
-    private static final int DEFAULT_REDIS_PORT = 6379;
+public class RedisServer extends RedisInstance {
+    public static final int DEFAULT_REDIS_PORT = 6379;
+    public static final Pattern SERVER_READY_PATTERN = Pattern.compile(".*[Rr]eady to accept connections.*");
 
     public RedisServer() {
         this(DEFAULT_REDIS_PORT);
     }
 
     public RedisServer(final int port) {
-        this(port, builder().port(port).build().args);
+        this(port, newRedisServer().port(port).buildCommandArgs());
 	}
 
-    public RedisServer(File executable, int port) {
+    public RedisServer(final int port, final File executable) {
         this(port, Arrays.asList(
             executable.getAbsolutePath(),
             "--port", Integer.toString(port)
         ));
     }
 
-    public RedisServer(final RedisExecProvider redisExecProvider, final int port) throws IOException {
+    public RedisServer(final int port, final RedisExecProvider redisExecProvider) throws IOException {
         this(port, Arrays.asList(
             redisExecProvider.get().getAbsolutePath(),
             "--port", Integer.toString(port)
@@ -32,11 +33,10 @@ public class RedisServer extends AbstractRedisInstance {
     }
 
     RedisServer(final int port, final List<String> args) {
-        super(port, ".*(R|r)eady to accept connections.*");
-        this.args = new ArrayList<String>(args);
+        super(port, args, SERVER_READY_PATTERN);
     }
 
-    public static RedisServerBuilder builder() {
+    public static RedisServerBuilder newRedisServer() {
         return new RedisServerBuilder();
     }
 

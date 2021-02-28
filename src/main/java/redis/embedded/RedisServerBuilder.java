@@ -1,22 +1,20 @@
 package redis.embedded;
 
-import com.google.common.base.Strings;
-import com.google.common.io.Files;
-import redis.embedded.exceptions.RedisBuildingException;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RedisServerBuilder {
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+public final class RedisServerBuilder {
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
     private static final String CONF_FILENAME = "embedded-redis-server";
 
     private File executable;
-    private RedisExecProvider redisExecProvider = RedisExecProvider.defaultProvider();
+    private RedisExecProvider redisExecProvider = new RedisExecProvider();
     private String bind = "127.0.0.1";
     private int port = 6379;
     private InetSocketAddress slaveOf;
@@ -51,7 +49,7 @@ public class RedisServerBuilder {
 
     public RedisServerBuilder configFile(final String redisConf) {
         if (redisConfigBuilder != null) {
-            throw new RedisBuildingException("Redis configuration is already partially build using setting(String) method!");
+            throw new IllegalArgumentException("Redis configuration is already partially build using setting(String) method");
         }
         this.redisConf = redisConf;
         return this;
@@ -59,23 +57,19 @@ public class RedisServerBuilder {
 
     public RedisServerBuilder setting(final String configLine) {
         if (redisConf != null) {
-            throw new RedisBuildingException("Redis configuration is already set using redis conf file!");
+            throw new IllegalArgumentException("Redis configuration is already set using redis conf file");
         }
 
         if (redisConfigBuilder == null) {
             redisConfigBuilder = new StringBuilder();
         }
 
-        redisConfigBuilder.append(configLine);
-        redisConfigBuilder.append(LINE_SEPARATOR);
+        redisConfigBuilder.append(configLine).append(LINE_SEPARATOR);
         return this;
     }
 
     public RedisServer build() {
-        setting("bind " + bind);
-        tryResolveConfAndExec();
-        List<String> args = buildCommandArgs();
-        return new RedisServer(port, args);
+        return new RedisServer(port, buildCommandArgs());
     }
 
     public void reset() {
@@ -85,38 +79,14 @@ public class RedisServerBuilder {
         this.redisConf = null;
     }
 
-    private void tryResolveConfAndExec() {
-        try {
-            resolveConfAndExec();
-        } catch (IOException e) {
-            throw new RedisBuildingException("Could not build server instance", e);
-        }
-    }
+    public List<String> buildCommandArgs() {
+        setting("bind " + bind);
+        tryResolveConfAndExec();
 
-    private void resolveConfAndExec() throws IOException {
-        if (redisConf == null && redisConfigBuilder != null) {
-            File redisConfigFile = File.createTempFile(resolveConfigName(), ".conf");
-            redisConfigFile.deleteOnExit();
-            Files.write(redisConfigBuilder.toString(), redisConfigFile, Charset.forName("UTF-8"));
-            redisConf = redisConfigFile.getAbsolutePath();
-        }
-
-        try {
-            executable = redisExecProvider.get();
-        } catch (Exception e) {
-            throw new RedisBuildingException("Failed to resolve executable", e);
-        }
-    }
-
-    private String resolveConfigName() {
-        return CONF_FILENAME + "_" + port;
-    }
-
-    private List<String> buildCommandArgs() {
         List<String> args = new ArrayList<String>();
         args.add(executable.getAbsolutePath());
 
-        if (!Strings.isNullOrEmpty(redisConf)) {
+        if (redisConf != null && !redisConf.isEmpty()) {
             args.add(redisConf);
         }
 
@@ -131,4 +101,28 @@ public class RedisServerBuilder {
 
         return args;
     }
+
+    private void tryResolveConfAndExec() {
+        try {
+            resolveConfAndExec();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Could not build server instance", e);
+        }
+    }
+
+    private void resolveConfAndExec() throws IOException {
+        if (redisConf == null && redisConfigBuilder != null) {
+            File redisConfigFile = File.createTempFile(CONF_FILENAME + "_" + port, ".conf");
+            redisConfigFile.deleteOnExit();
+            Files.write(redisConfigFile.toPath(), redisConfigBuilder.toString().getBytes(UTF_8));
+            redisConf = redisConfigFile.getAbsolutePath();
+        }
+
+        try {
+            executable = redisExecProvider.get();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to resolve executable", e);
+        }
+    }
+
 }

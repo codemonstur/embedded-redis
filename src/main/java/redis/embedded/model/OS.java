@@ -1,6 +1,6 @@
-package redis.embedded.util;
+package redis.embedded.model;
 
-import redis.embedded.exceptions.OsDetectionException;
+import redis.embedded.exceptions.UnknownOSName;
 
 import java.util.function.Supplier;
 
@@ -13,6 +13,7 @@ public enum OS {
     OS(final Supplier<Architecture> archSupplier) {
         this.archSupplier = archSupplier;
     }
+
     public Architecture detectArchitecture() {
         return archSupplier.get();
     }
@@ -27,7 +28,7 @@ public enum OS {
         if ("Mac OS X".equalsIgnoreCase(osName))
             return OS.MAC_OS_X;
 
-        throw new OsDetectionException("Unrecognized OS: " + osName);
+        throw new UnknownOSName(osName);
     }
 
 }

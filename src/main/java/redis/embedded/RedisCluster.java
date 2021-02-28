@@ -1,29 +1,33 @@
 package redis.embedded;
 
-import com.google.common.collect.Lists;
-import redis.embedded.exceptions.EmbeddedRedisException;
-
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public class RedisCluster implements Redis {
-    private final List<Redis> sentinels = new LinkedList<Redis>();
-    private final List<Redis> servers = new LinkedList<Redis>();
 
-    RedisCluster(List<Redis> sentinels, List<Redis> servers) {
+    private final List<Redis> sentinels = new LinkedList<>();
+    private final List<Redis> servers = new LinkedList<>();
+
+    RedisCluster(final List<Redis> sentinels, final List<Redis> servers) {
         this.servers.addAll(servers);
         this.sentinels.addAll(sentinels);
     }
 
     @Override
     public boolean isActive() {
-        for (Redis redis : sentinels) {
+//        Stream.concat(sentinels.stream(), servers.stream())
+//            .filter(redis -> !redis.isActive())
+//            .map(redis -> false)
+//            .findFirst()
+//            .orElse(true);
+        for (final Redis redis : sentinels) {
             if (!redis.isActive()) {
                 return false;
             }
         }
-        for (Redis redis : servers) {
+        for (final Redis redis : servers) {
             if (!redis.isActive()) {
                 return false;
             }
@@ -32,52 +36,52 @@ public class RedisCluster implements Redis {
     }
 
     @Override
-    public void start() throws EmbeddedRedisException {
-        for (Redis redis : sentinels) {
+    public void start() throws IOException {
+        for (final Redis redis : sentinels) {
             redis.start();
         }
-        for (Redis redis : servers) {
+        for (final Redis redis : servers) {
             redis.start();
         }
     }
 
     @Override
-    public void stop() throws EmbeddedRedisException {
-        for (Redis redis : sentinels) {
+    public void stop() throws IOException {
+        for (final Redis redis : sentinels) {
             redis.stop();
         }
-        for (Redis redis : servers) {
+        for (final Redis redis : servers) {
             redis.stop();
         }
     }
 
     @Override
     public List<Integer> ports() {
-        List<Integer> ports = new ArrayList<Integer>();
+        final List<Integer> ports = new ArrayList<Integer>();
         ports.addAll(sentinelPorts());
         ports.addAll(serverPorts());
         return ports;
     }
 
     public List<Redis> sentinels() {
-        return Lists.newLinkedList(sentinels);
+        return new LinkedList<>(sentinels);
     }
 
     public List<Integer> sentinelPorts() {
-        List<Integer> ports = new ArrayList<Integer>();
-        for (Redis redis : sentinels) {
+        final List<Integer> ports = new ArrayList<Integer>();
+        for (final Redis redis : sentinels) {
             ports.addAll(redis.ports());
         }
         return ports;
     }
 
     public List<Redis> servers() {
-        return Lists.newLinkedList(servers);
+        return new LinkedList<>(servers);
     }
 
     public List<Integer> serverPorts() {
-        List<Integer> ports = new ArrayList<Integer>();
-        for (Redis redis : servers) {
+        final List<Integer> ports = new ArrayList<Integer>();
+        for (final Redis redis : servers) {
             ports.addAll(redis.ports());
         }
         return ports;

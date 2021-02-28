@@ -8,6 +8,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import redis.clients.jedis.JedisShardInfo;
 
+import java.io.IOException;
+
 import static org.junit.Assert.assertEquals;
 
 public class SpringDataConnectivityTest {
@@ -17,7 +19,7 @@ public class SpringDataConnectivityTest {
     private JedisConnectionFactory connectionFactory;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws IOException {
         redisServer = new RedisServer(6379);
         redisServer.start();
 
@@ -31,7 +33,7 @@ public class SpringDataConnectivityTest {
     }
 
     @Test
-    public void shouldBeAbleToUseSpringData() throws Exception {
+    public void shouldBeAbleToUseSpringData() {
         // given
         template.opsForValue().set("foo", "bar");
 
@@ -43,7 +45,8 @@ public class SpringDataConnectivityTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() throws IOException {
         redisServer.stop();
     }
+
 }

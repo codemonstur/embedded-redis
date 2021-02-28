@@ -1,10 +1,8 @@
-package redis.embedded.util;
+package redis.embedded.model;
 
-import com.google.common.base.Preconditions;
-
-import static redis.embedded.util.Architecture.*;
-import static redis.embedded.util.Architecture.x86;
-import static redis.embedded.util.OS.WINDOWS;
+import static redis.embedded.model.Architecture.x86;
+import static redis.embedded.model.Architecture.x86_64;
+import static redis.embedded.model.OS.WINDOWS;
 
 public class OsArchitecture {
     
@@ -26,10 +24,7 @@ public class OsArchitecture {
         return new OsArchitecture(os, arch);
     }
 
-    public OsArchitecture(OS os, Architecture arch) {
-        Preconditions.checkNotNull(os);
-        Preconditions.checkNotNull(arch);
-        
+    public OsArchitecture(final OS os, final Architecture arch) {
         this.os = os;
         this.arch = arch;
     }
@@ -50,7 +45,6 @@ public class OsArchitecture {
         OsArchitecture that = (OsArchitecture) o;
 
         return arch == that.arch && os == that.os;
-
     }
 
     @Override
@@ -59,4 +53,5 @@ public class OsArchitecture {
         result = 31 * result + arch.hashCode();
         return result;
     }
+
 }
