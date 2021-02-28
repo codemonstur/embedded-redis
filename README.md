@@ -1,3 +1,8 @@
+[![Build Status](https://travis-ci.org/codemonstur/embedded-redis.svg?branch=master)](https://travis-ci.org/codemonstur/embedded-redis)
+[![GitHub Release](https://img.shields.io/github/release/codemonstur/embedded-redis.svg)](https://github.com/codemonstur/embedded-redis/releases)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.codemonstur/embedded-redis/badge.svg)](http://mvnrepository.com/artifact/com.github.codemonstur/embedded-redis)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 embedded-redis
 ==============
 
@@ -28,9 +33,9 @@ Maven dependency
 Maven Central:
 ```xml
 <dependency>
-  <groupId>it.ozimov</groupId>
+  <groupId>com.github.codemonstur</groupId>
   <artifactId>embedded-redis</artifactId>
-  <version>0.7.3</version>
+  <version>0.8.0</version>
 </dependency>
 ```
 
@@ -175,29 +180,3 @@ Contributors
  * Artem Orobets ([@enisher](http://github.com/enisher))
  * Sean Simonsen ([@SeanSimonsen](http://github.com/SeanSimonsen))
  * Rob Winch ([@rwinch](http://github.com/rwinch))
-
-
-Changelog
-==============
-
-### 0.6
- * Support JDK 6 +
-
-### 0.5
- * OS detection fix
- * redis binary per OS/arch pair
- * Updated to 2.8.19 binary for Windows
-
-### 0.4 
- * Updated for Java 8
- * Added Sentinel support
- * Ability to create arbitrary clusters on arbitrary (ephemeral) ports
- * Updated to latest guava 
- * Throw an exception if redis has not been started
- * Redis errorStream logged to System.out
-
-### 0.3
- * Fluent API for RedisServer creation
-
-### 0.2
- * Initial decent release
