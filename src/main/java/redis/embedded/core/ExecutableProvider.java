@@ -30,6 +30,7 @@ public interface ExecutableProvider {
         map.put(WINDOWS_x86_64, "redis-server-2.8.19.exe");
         map.put(UNIX_x86, "redis-server-2.8.19-32");
         map.put(UNIX_x86_64, "redis-server-2.8.19");
+        map.put(UNIX_aarch64, "redis-server-2.8.19-linux-aarch64");
         map.put(MAC_OS_X_x86, "redis-server-2.8.19.app");
         map.put(MAC_OS_X_x86_64, "redis-server-2.8.19.app");
         return map;

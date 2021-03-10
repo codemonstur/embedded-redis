@@ -15,9 +15,12 @@ import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
 import static redis.embedded.RedisServer.SERVER_READY_PATTERN;
+import static redis.embedded.model.Architecture.aarch64;
 import static redis.embedded.model.Architecture.x86;
 import static redis.embedded.model.Architecture.x86_64;
-import static redis.embedded.model.OS.*;
+import static redis.embedded.model.OS.MAC_OS_X;
+import static redis.embedded.model.OS.UNIX;
+import static redis.embedded.model.OS.WINDOWS;
 
 public class RedisServerTest {
 
@@ -99,6 +102,7 @@ public class RedisServerTest {
         ExecutableProvider customProvider = new ExecutableProviderBuilder()
                 .put(UNIX, x86, "redis-server-2.8.19-32")
                 .put(UNIX, x86_64, "redis-server-2.8.19")
+                .put(UNIX, aarch64, "redis-server-2.8.19-linux-aarch64")
                 .put(WINDOWS, x86, "redis-server-2.8.19.exe")
                 .put(WINDOWS, x86_64, "redis-server-2.8.19.exe")
                 .put(MAC_OS_X, "redis-server-2.8.19")
