@@ -10,7 +10,7 @@ import java.util.Map;
 import static redis.embedded.core.ExecutableProvider.newRedis2_8_19Map;
 
 public class ExecutableProviderBuilder {
-    private Map<OsArchitecture, String> map = new HashMap<>();
+    private final Map<OsArchitecture, String> map = new HashMap<>();
 
     public ExecutableProviderBuilder add2_8_19() {
         map.putAll(newRedis2_8_19Map());
