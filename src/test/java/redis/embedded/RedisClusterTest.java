@@ -19,6 +19,7 @@ import static org.mockito.Mockito.verify;
 import static redis.embedded.util.Collections.newHashSet;
 
 public class RedisClusterTest {
+
     private Redis sentinel1;
     private Redis sentinel2;
     private Redis master1;
@@ -36,15 +37,12 @@ public class RedisClusterTest {
 
     @Test
     public void stopShouldStopEntireCluster() throws IOException {
-        //given
         final List<Redis> sentinels = Arrays.asList(sentinel1, sentinel2);
         final List<Redis> servers = Arrays.asList(master1, master2);
         instance = new RedisCluster(sentinels, servers);
 
-        //when
         instance.stop();
 
-        //then
         for (final Redis s : sentinels) {
             verify(s).stop();
         }
@@ -55,15 +53,12 @@ public class RedisClusterTest {
 
     @Test
     public void startShouldStartEntireCluster() throws IOException {
-        //given
         final List<Redis> sentinels = Arrays.asList(sentinel1, sentinel2);
         final List<Redis> servers = Arrays.asList(master1, master2);
         instance = new RedisCluster(sentinels, servers);
 
-        //when
         instance.start();
 
-        //then
         for (final Redis s : sentinels) {
             verify(s).start();
         }
@@ -74,7 +69,6 @@ public class RedisClusterTest {
 
     @Test
     public void isActiveShouldCheckEntireClusterIfAllActive() {
-        //given
         given(sentinel1.isActive()).willReturn(true);
         given(sentinel2.isActive()).willReturn(true);
         given(master1.isActive()).willReturn(true);
@@ -83,10 +77,8 @@ public class RedisClusterTest {
         final List<Redis> servers = Arrays.asList(master1, master2);
         instance = new RedisCluster(sentinels, servers);
 
-        //when
         instance.isActive();
 
-        //then
         for (final Redis s : sentinels) {
             verify(s).isActive();
         }
@@ -97,11 +89,9 @@ public class RedisClusterTest {
 
     @Test
     public void testSimpleOperationsAfterRunWithSingleMasterNoSlavesCluster() throws IOException {
-        //given
         final RedisCluster cluster = RedisCluster.newRedisCluster().sentinelCount(1).replicationGroup("ourmaster", 0).build();
         cluster.start();
 
-        //when
         JedisSentinelPool pool = null;
         Jedis jedis = null;
         try {
@@ -116,11 +106,9 @@ public class RedisClusterTest {
 
     @Test
     public void testSimpleOperationsAfterRunWithSingleMasterAndOneSlave() throws IOException {
-        //given
         final RedisCluster cluster = RedisCluster.newRedisCluster().sentinelCount(1).replicationGroup("ourmaster", 1).build();
         cluster.start();
 
-        //when
         JedisSentinelPool pool = null;
         Jedis jedis = null;
         try {
@@ -135,11 +123,9 @@ public class RedisClusterTest {
 
     @Test
     public void testSimpleOperationsAfterRunWithSingleMasterMultipleSlaves() throws IOException {
-        //given
         final RedisCluster cluster = RedisCluster.newRedisCluster().sentinelCount(1).replicationGroup("ourmaster", 2).build();
         cluster.start();
 
-        //when
         JedisSentinelPool pool = null;
         Jedis jedis = null;
         try {
@@ -154,11 +140,9 @@ public class RedisClusterTest {
 
     @Test
     public void testSimpleOperationsAfterRunWithTwoSentinelsSingleMasterMultipleSlaves() throws IOException {
-        //given
         final RedisCluster cluster = RedisCluster.newRedisCluster().sentinelCount(2).replicationGroup("ourmaster", 2).build();
         cluster.start();
 
-        //when
         JedisSentinelPool pool = null;
         Jedis jedis = null;
         try {
@@ -173,13 +157,11 @@ public class RedisClusterTest {
 
     @Test
     public void testSimpleOperationsAfterRunWithTwoPredefinedSentinelsSingleMasterMultipleSlaves() throws IOException {
-        //given
         List<Integer> sentinelPorts = Arrays.asList(26381, 26382);
         final RedisCluster cluster = RedisCluster.newRedisCluster().sentinelPorts(sentinelPorts).replicationGroup("ourmaster", 2).build();
         cluster.start();
         final Set<String> sentinelHosts = JedisUtil.portsToJedisHosts(sentinelPorts);
 
-        //when
         JedisSentinelPool pool = null;
         Jedis jedis = null;
         try {
@@ -194,7 +176,6 @@ public class RedisClusterTest {
 
     @Test
     public void testSimpleOperationsAfterRunWithThreeSentinelsThreeMastersOneSlavePerMasterCluster() throws IOException {
-        //given
         final String master1 = "master1";
         final String master2 = "master2";
         final String master3 = "master3";
@@ -205,7 +186,6 @@ public class RedisClusterTest {
                 .build();
         cluster.start();
 
-        //when
         JedisSentinelPool pool1 = null;
         JedisSentinelPool pool2 = null;
         JedisSentinelPool pool3 = null;
@@ -232,7 +212,6 @@ public class RedisClusterTest {
 
     @Test
     public void testSimpleOperationsAfterRunWithThreeSentinelsThreeMastersOneSlavePerMasterEphemeralCluster() throws IOException {
-        //given
         final String master1 = "master1";
         final String master2 = "master2";
         final String master3 = "master3";
@@ -244,7 +223,6 @@ public class RedisClusterTest {
         cluster.start();
         final Set<String> sentinelHosts = JedisUtil.sentinelHosts(cluster);
 
-        //when
         JedisSentinelPool pool1 = null;
         JedisSentinelPool pool2 = null;
         JedisSentinelPool pool3 = null;
@@ -274,7 +252,6 @@ public class RedisClusterTest {
         jedis = pool.getResource();
         jedis.mset("abc", "1", "def", "2");
 
-        //then
         assertEquals("1", jedis.mget("abc").get(0));
         assertEquals("2", jedis.mget("def").get(0));
         assertNull(jedis.mget("xyz").get(0));

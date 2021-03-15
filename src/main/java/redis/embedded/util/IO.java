@@ -61,6 +61,11 @@ public enum IO {;
         return false;
     }
 
+    public static Stream<String> processToLines(final String command) throws IOException {
+        final Process proc = Runtime.getRuntime().exec(command);
+        return streamToLines(proc.getInputStream());
+    }
+
     public static Stream<String> streamToLines(final InputStream in) {
         return new BufferedReader(new InputStreamReader(in)).lines();
     }

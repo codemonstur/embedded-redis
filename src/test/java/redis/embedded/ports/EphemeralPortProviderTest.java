@@ -13,18 +13,14 @@ public class EphemeralPortProviderTest {
 
     @Test
     public void nextShouldGiveNextFreeEphemeralPort() {
-        //given
         final int portCount = 20;
         final PortProvider provider = newEphemeralPortProvider();
 
-        //when
         final List<Integer> ports = new ArrayList<Integer>();
         for (int i = 0; i < portCount; i++) {
             ports.add(provider.get());
         }
 
-        //then
-        System.out.println(ports);
         assertEquals(portCount, ports.size());
     }
 

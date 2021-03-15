@@ -1,0 +1,9 @@
+FROM arm64v8/ubuntu:20.04
+
+RUN apt-get update \
+ && apt-get install make gcc tcl -y
+
+ADD compile-redis.sh /
+WORKDIR /redis
+
+CMD ["/compile-redis.sh"]

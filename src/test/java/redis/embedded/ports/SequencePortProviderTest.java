@@ -10,12 +10,10 @@ public class SequencePortProviderTest {
 
     @Test
     public void nextShouldIncrementPorts() {
-        //given
         final int startPort = 10;
         final int portCount = 101;
         final PortProvider provider = newSequencePortProvider(startPort);
 
-        //when
         int max = 0;
         for (int i = 0; i < portCount; i++) {
             int port = provider.get();
@@ -24,7 +22,6 @@ public class SequencePortProviderTest {
             }
         }
 
-        //then
         assertEquals(portCount + startPort - 1, max);
     }
 

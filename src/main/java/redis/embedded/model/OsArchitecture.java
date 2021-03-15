@@ -14,7 +14,7 @@ public class OsArchitecture {
         WINDOWS_x86_64 = new OsArchitecture(WINDOWS, x86_64),
         UNIX_x86 = new OsArchitecture(UNIX, x86),
         UNIX_x86_64 = new OsArchitecture(UNIX, x86_64),
-        UNIX_aarch64 = new OsArchitecture(UNIX, aarch64),
+        UNIX_AARCH64 = new OsArchitecture(UNIX, aarch64),
         MAC_OS_X_x86 = new OsArchitecture(MAC_OS_X, x86),
         MAC_OS_X_x86_64 = new OsArchitecture(MAC_OS_X, x86_64);
 

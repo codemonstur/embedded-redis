@@ -34,13 +34,10 @@ public class SpringDataConnectivityTest {
 
     @Test
     public void shouldBeAbleToUseSpringData() {
-        // given
         template.opsForValue().set("foo", "bar");
 
-        // when
         String result = template.opsForValue().get("foo");
 
-        // then
         assertEquals("bar", result);
     }
 

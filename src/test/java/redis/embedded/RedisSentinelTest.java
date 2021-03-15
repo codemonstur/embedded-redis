@@ -16,6 +16,7 @@ import static redis.embedded.RedisSentinel.SENTINEL_READY_PATTERN;
 import static redis.embedded.util.Collections.newHashSet;
 
 public class RedisSentinelTest {
+
     private RedisSentinel sentinel;
     private RedisServer server;
 
@@ -45,14 +46,12 @@ public class RedisSentinelTest {
 
     @Test
     public void testSimpleOperationsAfterRun() throws InterruptedException, IOException {
-        //given
         server = new RedisServer();
         sentinel = RedisSentinel.newRedisSentinel().build();
         server.start();
         sentinel.start();
         TimeUnit.SECONDS.sleep(1);
 
-        //when
         JedisSentinelPool pool = null;
         Jedis jedis = null;
         try {
@@ -60,7 +59,6 @@ public class RedisSentinelTest {
             jedis = pool.getResource();
             jedis.mset("abc", "1", "def", "2");
 
-            //then
             assertEquals("1", jedis.mget("abc").get(0));
             assertEquals("2", jedis.mget("def").get(0));
             assertNull(jedis.mget("xyz").get(0));

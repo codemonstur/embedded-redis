@@ -18,7 +18,7 @@ public enum JedisUtil {;
     }
 
     public static Set<String> portsToJedisHosts(final List<Integer> ports) {
-        final Set<String> hosts = new HashSet<String>();
+        final Set<String> hosts = new HashSet<>();
         for (final Integer p : ports) {
             hosts.add("localhost:" + p);
         }
