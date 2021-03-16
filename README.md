@@ -73,6 +73,24 @@ RedisServer redisServer = RedisServer.builder()
   .build();
 ```
 
+## Using ARM hardware
+
+The library contains a pre-compiled binary for ARM architecture.
+However, this binary was generated using the QEMU emulator and did not work with the Redis tests.
+It is not known whether it will actually work.
+
+The makefile contains a target (build-arm) that will generate a binary from Redis source.
+Use this to generate your own binary and then configure it.
+
+```java
+final ExecutableProvider executables = new ExecutableProviderBuilder()
+    .add2_8_19()
+    .put(OS.UNIX, Architecture.aarch64, "/path/to/resource/redis-server-arm")
+    .build();
+
+new RedisServer(Redis.DEFAULT_REDIS_PORT, executables);
+```
+
 ## Setting up a cluster
 
 Our Embedded Redis has support for HA Redis clusters with Sentinels and master-slave replication

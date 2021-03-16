@@ -48,7 +48,11 @@ deploy: build
 
 build-arm:
 	@echo "[$(NAME)] Configuring build environment"
-	@docker run -it --rm --privileged multiarch/qemu-user-static --credential yes --persistent yes
+	# Testing has revealed that a QEMU generated binary differs from a binary generated on ARM hardware
+	# Redis tests run using `make tests` inside the docker image will fail with the QEMU generated binary
+	# see https://github.com/codemonstur/embedded-redis/pull/2 for details
+	# Uncomment this line if you are not running on ARM hardware:
+	#	@docker run -it --rm --privileged multiarch/qemu-user-static --credential yes --persistent yes
 	@docker build -t embedded-redis/ubuntu-arm -f src/main/binaries/DockerArm src/main/binaries
 	@-mkdir target > /dev/null
 	@echo "[$(NAME)] Downloading Redis sources for 2.8.19"
