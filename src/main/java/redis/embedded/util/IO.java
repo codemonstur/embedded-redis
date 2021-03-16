@@ -17,7 +17,7 @@ public enum IO {;
         tempDirectory.deleteOnExit();
 
         final File command = new File(tempDirectory, resourcePath);
-        try (final InputStream in = IO.class.getResourceAsStream("/"+resourcePath)) {
+        try (final InputStream in = IO.class.getResourceAsStream(resourcePath)) {
             Files.copy(in, command.toPath(), REPLACE_EXISTING);
         }
         command.deleteOnExit();

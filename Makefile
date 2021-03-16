@@ -1,11 +1,12 @@
 
-.PHONY: help clean build check-versions release-notes deploy
+.PHONY: help clean build check-versions release-notes deploy build-arm
 
 DATE=`date +'%F'`
 NAME=`xmllint --xpath "//project/artifactId/text()" pom.xml`
 VERSION=`xmllint --xpath "//project/version/text()" pom.xml`
 PREVIOUS_TAG=`git tag | sort -r | head -n 1`
 CWD=`pwd`
+REDIS_VERSION="2.8.19"
 
 help:
 	@echo "Available targets for $(NAME):"
@@ -55,10 +56,10 @@ build-arm:
 	#	@docker run -it --rm --privileged multiarch/qemu-user-static --credential yes --persistent yes
 	@docker build -t embedded-redis/ubuntu-arm -f src/main/binaries/DockerArm src/main/binaries
 	@-mkdir target > /dev/null
-	@echo "[$(NAME)] Downloading Redis sources for 2.8.19"
-	@cd target && wget https://download.redis.io/releases/redis-2.8.19.tar.gz > /dev/null
+	@echo "[$(NAME)] Downloading Redis sources for $(REDIS_VERSION)"
+	@cd target && wget https://download.redis.io/releases/redis-$(REDIS_VERSION).tar.gz > /dev/null
 	@echo "[$(NAME)] Unpacking Redis sources"
-	@cd target && tar xfvz redis-2.8.19.tar.gz > /dev/null
+	@cd target && tar xfvz redis-$(REDIS_VERSION).tar.gz > /dev/null
 	@echo "[$(NAME)] Compiling Redis"
-	@docker run -it --rm -v $(CWD)/target/redis-2.8.19:/redis embedded-redis/ubuntu-arm
-	@echo "[$(NAME)] Done. Access your binary at target/redis-2.8.19/src/redis-server"
+	@docker run -it --rm -v $(CWD)/target/redis-$(REDIS_VERSION):/redis embedded-redis/ubuntu-arm
+	@echo "[$(NAME)] Done. Access your binary at target/redis-$(REDIS_VERSION)/src/redis-server"
