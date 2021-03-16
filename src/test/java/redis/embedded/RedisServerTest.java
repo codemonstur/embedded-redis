@@ -100,12 +100,12 @@ public class RedisServerTest {
     @Test
     public void shouldOverrideDefaultExecutable() {
         ExecutableProvider customProvider = new ExecutableProviderBuilder()
-                .put(UNIX, x86, "redis-server-2.8.19-32")
-                .put(UNIX, x86_64, "redis-server-2.8.19")
-                .put(UNIX, aarch64, "redis-server-2.8.19-linux-aarch64")
-                .put(WINDOWS, x86, "redis-server-2.8.19.exe")
-                .put(WINDOWS, x86_64, "redis-server-2.8.19.exe")
-                .put(MAC_OS_X, "redis-server-2.8.19")
+                .put(UNIX, x86, "/redis-server-2.8.19-32")
+                .put(UNIX, x86_64, "/redis-server-2.8.19")
+                .put(UNIX, aarch64, "/redis-server-2.8.19-linux-aarch64")
+                .put(WINDOWS, x86, "/redis-server-2.8.19.exe")
+                .put(WINDOWS, x86_64, "/redis-server-2.8.19.exe")
+                .put(MAC_OS_X, "/redis-server-2.8.19")
                 .build();
 
         redisServer = new RedisServerBuilder()
