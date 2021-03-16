@@ -1,0 +1,6 @@
+0.9.0
+
+Added make target for arm builds
+Added arm binary
+Added notes.md
+Add support for Linux ARM64 (Aarch64) architecture
