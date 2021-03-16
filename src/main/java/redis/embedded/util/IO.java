@@ -16,13 +16,14 @@ public enum IO {;
         final File tempDirectory = createDirectories(createTempDirectory("redis-")).toFile();
         tempDirectory.deleteOnExit();
 
-        final File command = new File(tempDirectory, resourcePath);
+        final File executable = new File(tempDirectory, resourcePath);
         try (final InputStream in = IO.class.getResourceAsStream(resourcePath)) {
-            Files.copy(in, command.toPath(), REPLACE_EXISTING);
+            Files.copy(in, executable.toPath(), REPLACE_EXISTING);
         }
-        command.deleteOnExit();
-        command.setExecutable(true);
-        return command;
+        executable.deleteOnExit();
+        if (!executable.setExecutable(true))
+            throw new IOException("Failed to set executable permission for binary " + resourcePath + " at temporary location " + executable);
+        return executable;
     }
 
     public static Runnable checkedToRuntime(final CheckedRunnable runnable) {
@@ -63,11 +64,7 @@ public enum IO {;
 
     public static Stream<String> processToLines(final String command) throws IOException {
         final Process proc = Runtime.getRuntime().exec(command);
-        return streamToLines(proc.getInputStream());
-    }
-
-    public static Stream<String> streamToLines(final InputStream in) {
-        return new BufferedReader(new InputStreamReader(in)).lines();
+        return new BufferedReader(new InputStreamReader(proc.getInputStream())).lines();
     }
 
 }
