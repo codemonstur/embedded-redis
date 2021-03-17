@@ -79,7 +79,7 @@ public enum IO {;
             .split(Pattern.quote(File.pathSeparator)))
             .map(Paths::get)
             .map(path -> path.resolve(name))
-            .filter(java.nio.file.Files::isRegularFile)
+            .filter(Files::isRegularFile)
             .findAny();
         if (!location.isPresent()) throw new FileNotFoundException("Could not find binary '" + name + "' in PATH");
         return location.get();
