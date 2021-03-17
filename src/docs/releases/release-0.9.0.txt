@@ -4,3 +4,4 @@ Added make target for arm builds
 Added arm binary
 Added notes.md
 Add support for Linux ARM64 (Aarch64) architecture
+Rewrite of ExecutableProvider for flexibility
