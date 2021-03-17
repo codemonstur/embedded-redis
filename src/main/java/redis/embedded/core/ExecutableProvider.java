@@ -3,30 +3,38 @@ package redis.embedded.core;
 import redis.embedded.model.OsArchitecture;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import static redis.embedded.model.OsArchitecture.*;
+import static redis.embedded.util.IO.findBinaryInPath;
 import static redis.embedded.util.IO.writeResourceToExecutableFile;
 
 public interface ExecutableProvider {
 
-    String getExecutableFor(OsArchitecture osa);
+    File get() throws IOException;
 
-    // The logic implemented here was not changed from the original code,
-    // however, this feels like a security vulnerability to me; what happens
-    // when an attacker places a binary of his chosing at the exact place
-    // the default config will look?
-    // FIXME provide a proper location lookup implementation
-    default File get() throws IOException {
-        final String executablePath = getExecutableFor(detectOSandArchitecture());
-        final File executable = new File(executablePath);
-        return executable.isFile() ? executable : writeResourceToExecutableFile(executablePath);
+    static ExecutableProvider newEmbeddedRedis2_8_19Provider() {
+        final Map<OsArchitecture, String> executables = newRedis2_8_19Map();
+        return () -> writeResourceToExecutableFile(executables.get(detectOSandArchitecture()));
     }
 
-    static ExecutableProvider newRedis2_8_19Provider() {
-        return newRedis2_8_19Map()::get;
+    static ExecutableProvider newFileThenJarResourceProvider(final Map<OsArchitecture, String> executables) {
+        return () -> {
+            final String executablePath = executables.get(detectOSandArchitecture());
+            final File executable = new File(executablePath);
+            return executable.isFile() ? executable : writeResourceToExecutableFile(executablePath);
+        };
+    }
+
+    static ExecutableProvider newJarResourceProvider(final Map<OsArchitecture, String> executables) {
+        return () -> writeResourceToExecutableFile(executables.get(detectOSandArchitecture()));
+    }
+
+    static ExecutableProvider newExecutableInPath(final String executableName) throws FileNotFoundException {
+        return findBinaryInPath(executableName)::toFile;
     }
 
     static Map<OsArchitecture, String> newRedis2_8_19Map() {

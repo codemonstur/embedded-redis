@@ -19,11 +19,6 @@ public final class RedisCluster implements Redis {
 
     @Override
     public boolean isActive() {
-//        Stream.concat(sentinels.stream(), servers.stream())
-//            .filter(redis -> !redis.isActive())
-//            .map(redis -> false)
-//            .findFirst()
-//            .orElse(true);
         for (final Redis redis : sentinels) {
             if (!redis.isActive()) {
                 return false;

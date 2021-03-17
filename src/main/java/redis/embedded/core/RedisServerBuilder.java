@@ -11,7 +11,7 @@ import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static redis.embedded.Redis.DEFAULT_REDIS_PORT;
-import static redis.embedded.core.ExecutableProvider.newRedis2_8_19Provider;
+import static redis.embedded.core.ExecutableProvider.newEmbeddedRedis2_8_19Provider;
 
 public final class RedisServerBuilder {
     private static final String
@@ -19,7 +19,7 @@ public final class RedisServerBuilder {
         CONF_FILENAME = "embedded-redis-server";
 
     private File executable;
-    private ExecutableProvider executableProvider = newRedis2_8_19Provider();
+    private ExecutableProvider executableProvider = newEmbeddedRedis2_8_19Provider();
     private String bind = "127.0.0.1";
     private int port = DEFAULT_REDIS_PORT;
     private InetSocketAddress slaveOf;
@@ -27,7 +27,7 @@ public final class RedisServerBuilder {
 
     private StringBuilder redisConfigBuilder;
 
-    public RedisServerBuilder redisExecProvider(ExecutableProvider executableProvider) {
+    public RedisServerBuilder redisExecProvider(final ExecutableProvider executableProvider) {
         this.executableProvider = executableProvider;
         return this;
     }
@@ -88,7 +88,7 @@ public final class RedisServerBuilder {
         setting("bind " + bind);
         tryResolveConfAndExec();
 
-        List<String> args = new ArrayList<String>();
+        final List<String> args = new ArrayList<>();
         args.add(executable.getAbsolutePath());
 
         if (redisConf != null && !redisConf.isEmpty()) {

@@ -7,6 +7,7 @@ import redis.embedded.model.OsArchitecture;
 import java.util.HashMap;
 import java.util.Map;
 
+import static redis.embedded.core.ExecutableProvider.newJarResourceProvider;
 import static redis.embedded.core.ExecutableProvider.newRedis2_8_19Map;
 
 public class ExecutableProviderBuilder {
@@ -30,6 +31,6 @@ public class ExecutableProviderBuilder {
     }
 
     public ExecutableProvider build() {
-        return map::get;
+        return newJarResourceProvider(map);
     }
 }

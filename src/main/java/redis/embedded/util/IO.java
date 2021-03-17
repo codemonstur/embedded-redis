@@ -2,6 +2,9 @@ package redis.embedded.util;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -56,7 +59,7 @@ public enum IO {;
             String line; while ((line = reader.readLine()) != null) {
                 if (pattern.matcher(line).matches())
                     return true;
-                processOutput.append("\n").append(line);
+                processOutput.append('\n').append(line);
             }
         }
         return false;
@@ -65,6 +68,21 @@ public enum IO {;
     public static Stream<String> processToLines(final String command) throws IOException {
         final Process proc = Runtime.getRuntime().exec(command);
         return new BufferedReader(new InputStreamReader(proc.getInputStream())).lines();
+    }
+
+    public static Path findBinaryInPath(final String name) throws FileNotFoundException {
+        return findBinaryInPath(name, System.getenv("PATH"));
+    }
+
+    private static Path findBinaryInPath(final String name, final String pathVar) throws FileNotFoundException {
+        final Optional<Path> location = Stream.of(pathVar
+            .split(Pattern.quote(File.pathSeparator)))
+            .map(Paths::get)
+            .map(path -> path.resolve(name))
+            .filter(java.nio.file.Files::isRegularFile)
+            .findAny();
+        if (!location.isPresent()) throw new FileNotFoundException("Could not find binary '" + name + "' in PATH");
+        return location.get();
     }
 
 }

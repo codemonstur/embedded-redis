@@ -10,7 +10,7 @@ import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static redis.embedded.Redis.DEFAULT_REDIS_PORT;
-import static redis.embedded.core.ExecutableProvider.newRedis2_8_19Provider;
+import static redis.embedded.core.ExecutableProvider.newEmbeddedRedis2_8_19Provider;
 
 public final class RedisSentinelBuilder {
     private static final String
@@ -23,7 +23,7 @@ public final class RedisSentinelBuilder {
         LINE_PORT = "port %d";
 
     private File executable;
-    private ExecutableProvider executableProvider = newRedis2_8_19Provider();
+    private ExecutableProvider executableProvider = newEmbeddedRedis2_8_19Provider();
     private String bind = "127.0.0.1";
     private Integer port = 26379;
     private int masterPort = DEFAULT_REDIS_PORT;
