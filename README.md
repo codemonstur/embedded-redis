@@ -19,7 +19,7 @@ Maven Central:
 <dependency>
   <groupId>com.github.codemonstur</groupId>
   <artifactId>embedded-redis</artifactId>
-  <version>0.8.0</version>
+  <version>0.9.0</version>
 </dependency>
 ```
 
@@ -40,14 +40,14 @@ You can also provide RedisServer with your own executable:
 RedisServer redisServer = new RedisServer("/path/to/your/redis", 6379);
 
 // 2) given os-independent matrix
-RedisExecProvider customProvider = RedisExecProvider.defaultProvider()
-  .override(OS.UNIX, "/path/to/unix/redis")
-  .override(OS.WINDOWS, Architecture.x86, "/path/to/windows/redis")
-  .override(OS.Windows, Architecture.x86_64, "/path/to/windows/redis")
-  .override(OS.MAC_OS_X, Architecture.x86, "/path/to/macosx/redis")
-  .override(OS.MAC_OS_X, Architecture.x86_64, "/path/to/macosx/redis")
+ExecutableProvider customProvider = new ExecutableProviderBuilder()
+    .put(OS.UNIX, "/path/to/unix/redis")
+    .put(OS.WINDOWS, Architecture.x86, "/path/to/windows/redis")
+    .put(OS.WINDOWS, Architecture.x86_64, "/path/to/windows/redis")
+    .put(OS.MAC_OS_X, Architecture.x86, "/path/to/macosx/redis")
+    .put(OS.MAC_OS_X, Architecture.x86_64, "/path/to/macosx/redis")
   
-RedisServer redisServer = new RedisServer(customProvider, 6379);
+RedisServer redisServer = new RedisServer(6379, customProvider);
 ```
 
 You can also use fluent API to create RedisServer:
