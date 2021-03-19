@@ -98,8 +98,12 @@ public class RedisClusterTest {
             pool = new JedisSentinelPool("ourmaster", newHashSet("localhost:26379"));
             jedis = testPool(pool);
         } finally {
-            if (jedis != null)
-                pool.returnResource(jedis);
+            if (jedis != null) {
+                jedis.close();
+            }
+            if (pool != null) {
+                pool.destroy();
+            }
             cluster.stop();
         }
     }
@@ -115,8 +119,12 @@ public class RedisClusterTest {
             pool = new JedisSentinelPool("ourmaster", newHashSet("localhost:26379"));
             jedis = testPool(pool);
         } finally {
-            if (jedis != null)
-                pool.returnResource(jedis);
+            if (jedis != null) {
+                jedis.close();
+            }
+            if (pool != null) {
+                pool.destroy();
+            }
             cluster.stop();
         }
     }
@@ -132,8 +140,12 @@ public class RedisClusterTest {
             pool = new JedisSentinelPool("ourmaster", newHashSet("localhost:26379"));
             jedis = testPool(pool);
         } finally {
-            if (jedis != null)
-                pool.returnResource(jedis);
+            if (jedis != null) {
+                jedis.close();
+            }
+            if (pool != null) {
+                pool.destroy();
+            }
             cluster.stop();
         }
     }
@@ -149,8 +161,12 @@ public class RedisClusterTest {
             pool = new JedisSentinelPool("ourmaster", newHashSet("localhost:26379", "localhost:26380"));
             jedis = testPool(pool);
         } finally {
-            if (jedis != null)
-                pool.returnResource(jedis);
+            if (jedis != null) {
+                jedis.close();
+            }
+            if (pool != null) {
+                pool.destroy();
+            }
             cluster.stop();
         }
     }
@@ -168,8 +184,12 @@ public class RedisClusterTest {
             pool = new JedisSentinelPool("ourmaster", sentinelHosts);
             jedis = testPool(pool);
         } finally {
-            if (jedis != null)
-                pool.returnResource(jedis);
+            if (jedis != null) {
+                jedis.close();
+            }
+            if (pool != null) {
+                pool.destroy();
+            }
             cluster.stop();
         }
     }
@@ -200,12 +220,24 @@ public class RedisClusterTest {
             jedis2 = testPool(pool2);
             jedis3 = testPool(pool3);
         } finally {
-            if (jedis1 != null)
-                pool1.returnResource(jedis1);
-            if (jedis2 != null)
-                pool2.returnResource(jedis2);
-            if (jedis3 != null)
-                pool3.returnResource(jedis3);
+            if (jedis1 != null) {
+                jedis1.close();
+            }
+            if (pool1 != null) {
+                pool1.destroy();
+            }
+            if (jedis2 != null) {
+                jedis2.close();
+            }
+            if (pool2 != null) {
+                pool2.destroy();
+            }
+            if (jedis3 != null) {
+                jedis3.close();
+            }
+            if (pool3 != null) {
+                pool3.destroy();
+            }
             cluster.stop();
         }
     }
@@ -237,12 +269,24 @@ public class RedisClusterTest {
             jedis2 = testPool(pool2);
             jedis3 = testPool(pool3);
         } finally {
-            if (jedis1 != null)
-                pool1.returnResource(jedis1);
-            if (jedis2 != null)
-                pool2.returnResource(jedis2);
-            if (jedis3 != null)
-                pool3.returnResource(jedis3);
+            if (jedis1 != null) {
+                jedis1.close();
+            }
+            if (pool1 != null) {
+                pool1.destroy();
+            }
+            if (jedis2 != null) {
+                jedis2.close();
+            }
+            if (pool2 != null) {
+                pool2.destroy();
+            }
+            if (jedis3 != null) {
+                jedis3.close();
+            }
+            if (pool3 != null) {
+                pool3.destroy();
+            }
             cluster.stop();
         }
     }

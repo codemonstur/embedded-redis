@@ -20,7 +20,7 @@ public final class RedisClusterBuilder {
     private int quorumSize = 1;
     private PortProvider sentinelPortProvider = newSequencePortProvider(26379);
     private PortProvider replicationGroupPortProvider = newSequencePortProvider(6379);
-    private final List<ReplicationGroup> groups = new LinkedList<ReplicationGroup>();
+    private final List<ReplicationGroup> groups = new LinkedList<>();
 
     public RedisClusterBuilder withSentinelBuilder(final RedisSentinelBuilder sentinelBuilder) {
         this.sentinelBuilder = sentinelBuilder;
@@ -86,7 +86,7 @@ public final class RedisClusterBuilder {
     }
 
     private List<Redis> buildServers() {
-        final List<Redis> servers = new ArrayList<Redis>();
+        final List<Redis> servers = new ArrayList<>();
         for (final ReplicationGroup g : groups) {
             servers.add(buildMaster(g));
             buildSlaves(servers, g);

@@ -42,8 +42,12 @@ public class RedisServerClusterTest {
             assertEquals("2", jedis.mget("def").get(0));
             assertNull(jedis.mget("xyz").get(0));
         } finally {
-            if (jedis != null)
-                pool.returnResource(jedis);
+            if (jedis != null) {
+                jedis.close();
+            }
+            if (pool != null) {
+                pool.destroy();
+            }
         }
     }
 
