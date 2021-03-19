@@ -3,6 +3,7 @@ package redis.embedded;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -43,7 +44,7 @@ public abstract class RedisInstance implements Redis {
     private void awaitServerReady() throws IOException {
         final StringBuilder log = new StringBuilder();
         if (!findMatchInStream(process.getInputStream(), readyPattern, log))
-            throw new IOException("Ready pattern not found in log. Startup log: " + log.toString());
+            throw new IOException("Ready pattern not found in log. Startup log: " + log);
     }
 
     public synchronized void stop() throws IOException {
@@ -63,7 +64,7 @@ public abstract class RedisInstance implements Redis {
     }
 
     public List<Integer> ports() {
-        return Arrays.asList(port);
+        return Collections.singletonList(port);
     }
 
 }
