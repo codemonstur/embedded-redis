@@ -1,12 +1,23 @@
+dist: focal
+
 language: java
 
-dist: trusty
+jdk: openjdk11
 
-jdk:
-  - oraclejdk8
+arch:
+  - amd64
+  - arm64
 
-install:
-    true
+addons:
+  apt:
+    packages:
+      - maven
+
+cache:
+  directories:
+    - $HOME/.m2
+
+install: true
 
 before_script:
   - pip install --user codecov
@@ -19,5 +30,5 @@ after_success:
   - codecov --build "$TRAVIS_JOB_NUMBER-jdk8"
 
 notifications:
-    email:
-      on_failure: change
+  email:
+    on_failure: change
