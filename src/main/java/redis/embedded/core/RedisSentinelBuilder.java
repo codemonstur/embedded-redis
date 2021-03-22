@@ -89,6 +89,11 @@ public final class RedisSentinelBuilder {
         return this;
     }
 
+    public RedisSentinelBuilder settingIf(final boolean shouldSet, final String configLine) {
+        if (shouldSet) setting(configLine);
+        return this;
+    }
+
     public RedisSentinelBuilder setting(final String configLine) {
         if (sentinelConf != null) {
             throw new IllegalArgumentException("Redis configuration is already set using redis conf file");

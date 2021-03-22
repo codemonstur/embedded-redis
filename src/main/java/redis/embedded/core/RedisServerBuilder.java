@@ -19,26 +19,26 @@ public final class RedisServerBuilder {
         CONF_FILENAME = "embedded-redis-server";
 
     private File executable;
-    private ExecutableProvider executableProvider = newEmbeddedRedis2_8_19Provider();
-    private String bind = "127.0.0.1";
-    private int port = DEFAULT_REDIS_PORT;
+    private ExecutableProvider provider = newEmbeddedRedis2_8_19Provider();
+    private String bindAddress = "127.0.0.1";
+    private int bindPort = DEFAULT_REDIS_PORT;
     private InetSocketAddress slaveOf;
     private String redisConf;
 
     private StringBuilder redisConfigBuilder;
 
-    public RedisServerBuilder executableProvider(final ExecutableProvider executableProvider) {
-        this.executableProvider = executableProvider;
+    public RedisServerBuilder executableProvider(final ExecutableProvider provider) {
+        this.provider = provider;
         return this;
     }
 
     public RedisServerBuilder bind(final String bind) {
-        this.bind = bind;
+        this.bindAddress = bind;
         return this;
     }
 
     public RedisServerBuilder port(final int port) {
-        this.port = port;
+        this.bindPort = port;
         return this;
     }
 
@@ -60,6 +60,11 @@ public final class RedisServerBuilder {
         return this;
     }
 
+    public RedisServerBuilder settingIf(final boolean shouldSet, final String configLine) {
+        if (shouldSet) setting(configLine);
+        return this;
+    }
+
     public RedisServerBuilder setting(final String configLine) {
         if (redisConf != null) {
             throw new IllegalArgumentException("Redis configuration is already set using redis conf file");
@@ -74,7 +79,7 @@ public final class RedisServerBuilder {
     }
 
     public RedisServer build() {
-        return new RedisServer(port, buildCommandArgs());
+        return new RedisServer(bindPort, buildCommandArgs());
     }
 
     public void reset() {
@@ -85,7 +90,7 @@ public final class RedisServerBuilder {
     }
 
     public List<String> buildCommandArgs() {
-        setting("bind " + bind);
+        setting("bind " + bindAddress);
         tryResolveConfAndExec();
 
         final List<String> args = new ArrayList<>();
@@ -96,7 +101,7 @@ public final class RedisServerBuilder {
         }
 
         args.add("--port");
-        args.add(Integer.toString(port));
+        args.add(Integer.toString(bindPort));
 
         if (slaveOf != null) {
             args.add("--slaveof");
@@ -117,14 +122,14 @@ public final class RedisServerBuilder {
 
     private void resolveConfAndExec() throws IOException {
         if (redisConf == null && redisConfigBuilder != null) {
-            File redisConfigFile = File.createTempFile(CONF_FILENAME + "_" + port, ".conf");
+            File redisConfigFile = File.createTempFile(CONF_FILENAME + "_" + bindPort, ".conf");
             redisConfigFile.deleteOnExit();
             Files.write(redisConfigFile.toPath(), redisConfigBuilder.toString().getBytes(UTF_8));
             redisConf = redisConfigFile.getAbsolutePath();
         }
 
         try {
-            executable = executableProvider.get();
+            executable = provider.get();
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to resolve executable", e);
         }
