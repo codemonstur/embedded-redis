@@ -27,7 +27,7 @@ public final class RedisServerBuilder {
 
     private StringBuilder redisConfigBuilder;
 
-    public RedisServerBuilder redisExecProvider(final ExecutableProvider executableProvider) {
+    public RedisServerBuilder executableProvider(final ExecutableProvider executableProvider) {
         this.executableProvider = executableProvider;
         return this;
     }

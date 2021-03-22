@@ -5,7 +5,6 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.embedded.core.ExecutableProvider;
 import redis.embedded.core.ExecutableProviderBuilder;
-import redis.embedded.core.RedisServerBuilder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,12 +14,9 @@ import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
 import static redis.embedded.RedisServer.SERVER_READY_PATTERN;
-import static redis.embedded.model.Architecture.aarch64;
-import static redis.embedded.model.Architecture.x86;
-import static redis.embedded.model.Architecture.x86_64;
-import static redis.embedded.model.OS.MAC_OS_X;
-import static redis.embedded.model.OS.UNIX;
-import static redis.embedded.model.OS.WINDOWS;
+import static redis.embedded.RedisServer.newRedisServer;
+import static redis.embedded.model.Architecture.*;
+import static redis.embedded.model.OS.*;
 
 public class RedisServerTest {
 
@@ -108,8 +104,8 @@ public class RedisServerTest {
                 .put(MAC_OS_X, "/redis-server-2.8.19")
                 .build();
 
-        redisServer = new RedisServerBuilder()
-                .redisExecProvider(customProvider)
+        redisServer = newRedisServer()
+                .executableProvider(customProvider)
                 .build();
     }
 
@@ -122,8 +118,8 @@ public class RedisServerTest {
                 .put(MAC_OS_X, "some")
                 .build();
 
-        redisServer = new RedisServerBuilder()
-                .redisExecProvider(buggyProvider)
+        redisServer = newRedisServer()
+                .executableProvider(buggyProvider)
                 .build();
     }
 

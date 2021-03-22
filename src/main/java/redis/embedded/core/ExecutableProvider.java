@@ -14,6 +14,9 @@ import static redis.embedded.util.IO.writeResourceToExecutableFile;
 
 public interface ExecutableProvider {
 
+    String ENVIRONMENT_EXECUTABLE_LOCATION = "EMBEDDED_REDIS_EXECUTABLE";
+    String PROPERTY_EXECUTABLE_LOCATION = "embedded.redis.executable";
+
     File get() throws IOException;
 
     static ExecutableProvider newEmbeddedRedis2_8_19Provider() {
@@ -27,6 +30,20 @@ public interface ExecutableProvider {
             final File executable = new File(executablePath);
             return executable.isFile() ? executable : writeResourceToExecutableFile(executablePath);
         };
+    }
+
+    static ExecutableProvider newEnvironmentVariableProvider() {
+        return newEnvironmentVariableProvider(ENVIRONMENT_EXECUTABLE_LOCATION);
+    }
+    static ExecutableProvider newEnvironmentVariableProvider(final String envName) {
+        return () -> new File(System.getenv(envName));
+    }
+
+    static ExecutableProvider newSystemPropertyProvider() {
+        return newSystemPropertyProvider(PROPERTY_EXECUTABLE_LOCATION);
+    }
+    static ExecutableProvider newSystemPropertyProvider(final String propertyName) {
+        return () -> new File(System.getProperty(propertyName));
     }
 
     static ExecutableProvider newJarResourceProvider(final Map<OsArchitecture, String> executables) {
