@@ -1,0 +1,7 @@
+0.10.0
+
+Added settingIf(boolean, String) in builders
+Added new ExecutableProvider implementations
+Updated binary for arm
+Lowered version on ubuntu for ARM build
+Generified the ExecutableProvider, Added helper providers for common approaches
