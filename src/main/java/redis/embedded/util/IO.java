@@ -21,6 +21,7 @@ public enum IO {;
 
         final File executable = new File(tempDirectory, resourcePath);
         try (final InputStream in = IO.class.getResourceAsStream(resourcePath)) {
+            if (in == null) throw new FileNotFoundException("Could not find Redis executable at " + resourcePath);
             Files.copy(in, executable.toPath(), REPLACE_EXISTING);
         }
         executable.deleteOnExit();

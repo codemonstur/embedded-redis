@@ -10,11 +10,11 @@ import java.util.List;
 
 public final class RedisServer extends RedisInstance {
 
-    public RedisServer() {
+    public RedisServer() throws IOException {
         this(DEFAULT_REDIS_PORT);
     }
 
-    public RedisServer(final int port) {
+    public RedisServer(final int port) throws IOException {
         this(port, newRedisServer().port(port).buildCommandArgs());
 	}
 

@@ -6,10 +6,7 @@ import redis.clients.jedis.JedisPool;
 import redis.embedded.core.ExecutableProvider;
 import redis.embedded.core.ExecutableProviderBuilder;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
@@ -72,7 +69,7 @@ public class RedisServerTest {
 	}
 
     @Test
-    public void shouldIndicateInactiveBeforeStart() {
+    public void shouldIndicateInactiveBeforeStart() throws IOException {
         redisServer = new RedisServer(6379);
         assertFalse(redisServer.isActive());
     }
@@ -94,7 +91,7 @@ public class RedisServerTest {
     }
 
     @Test
-    public void shouldOverrideDefaultExecutable() {
+    public void shouldOverrideDefaultExecutable() throws IOException {
         ExecutableProvider customProvider = new ExecutableProviderBuilder()
                 .put(UNIX, x86, "/redis-server-2.8.19-32")
                 .put(UNIX, x86_64, "/redis-server-2.8.19")
@@ -109,8 +106,8 @@ public class RedisServerTest {
                 .build();
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldFailWhenBadExecutableGiven() {
+    @Test(expected = FileNotFoundException.class)
+    public void shouldFailWhenBadExecutableGiven() throws IOException {
         ExecutableProvider buggyProvider = new ExecutableProviderBuilder()
                 .put(UNIX, "some")
                 .put(WINDOWS, x86, "some")

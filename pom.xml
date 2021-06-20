@@ -3,7 +3,7 @@
 
     <groupId>com.github.codemonstur</groupId>
     <artifactId>embedded-redis</artifactId>
-    <version>0.10.0</version>
+    <version>0.11.0</version>
     <packaging>jar</packaging>
 
     <name>embedded-redis</name>
@@ -74,7 +74,7 @@
     </dependencies>
 
     <prerequisites>
-        <maven>3.0.5</maven>
+        <maven>3.8.1</maven>
     </prerequisites>
 
     <distributionManagement>

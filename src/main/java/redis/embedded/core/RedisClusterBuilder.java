@@ -5,6 +5,7 @@ import redis.embedded.RedisCluster;
 import redis.embedded.RedisServer;
 import redis.embedded.model.ReplicationGroup;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -79,13 +80,13 @@ public final class RedisClusterBuilder {
         return this;
     }
 
-    public RedisCluster build() {
+    public RedisCluster build() throws IOException {
         final List<Redis> sentinels = buildSentinels();
         final List<Redis> servers = buildServers();
         return new RedisCluster(sentinels, servers);
     }
 
-    private List<Redis> buildServers() {
+    private List<Redis> buildServers() throws IOException {
         final List<Redis> servers = new ArrayList<>();
         for (final ReplicationGroup g : groups) {
             servers.add(buildMaster(g));
@@ -94,7 +95,7 @@ public final class RedisClusterBuilder {
         return servers;
     }
 
-    private void buildSlaves(final List<Redis> servers, ReplicationGroup g) {
+    private void buildSlaves(final List<Redis> servers, ReplicationGroup g) throws IOException {
         for (final Integer slavePort : g.slavePorts) {
             serverBuilder.reset();
             serverBuilder.port(slavePort);
@@ -104,7 +105,7 @@ public final class RedisClusterBuilder {
         }
     }
 
-    private Redis buildMaster(final ReplicationGroup g) {
+    private Redis buildMaster(final ReplicationGroup g) throws IOException {
         serverBuilder.reset();
         return serverBuilder.port(g.masterPort).build();
     }
