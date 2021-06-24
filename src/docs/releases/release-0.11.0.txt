@@ -1,0 +1,5 @@
+0.11.0
+
+Fixed error with setting both a configuration and a config file
+Improved exception handling
+Updated version in readme
