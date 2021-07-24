@@ -1,4 +1,3 @@
-[![Build Status](https://travis-ci.org/codemonstur/embedded-redis.svg?branch=master)](https://travis-ci.org/codemonstur/embedded-redis)
 [![GitHub Release](https://img.shields.io/github/release/codemonstur/embedded-redis.svg)](https://github.com/codemonstur/embedded-redis/releases)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.codemonstur/embedded-redis/badge.svg)](http://mvnrepository.com/artifact/com.github.codemonstur/embedded-redis)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
