@@ -115,7 +115,7 @@ public class SomeIntegrationTestThatRequiresRedis {
     jedisSentinelHosts = JedisUtil.sentinelHosts(cluster);
   }
   
-  @Test
+  @TestApp
   public void test() throws Exception {
     // testing code that requires redis running
     JedisSentinelPool pool = new JedisSentinelPool("master1", jedisSentinelHosts);
