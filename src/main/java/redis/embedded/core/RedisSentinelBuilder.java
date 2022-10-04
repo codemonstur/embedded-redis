@@ -33,6 +33,7 @@ public final class RedisSentinelBuilder {
     private int parallelSyncs = 1;
     private int quorumSize = 1;
     private String sentinelConf;
+    private boolean forceStop = false;
 
     private StringBuilder redisConfigBuilder;
 
@@ -107,9 +108,14 @@ public final class RedisSentinelBuilder {
         return this;
     }
 
+    public RedisSentinelBuilder onShutdownForceStop(final boolean forceStop) {
+        this.forceStop = forceStop;
+        return this;
+    }
+
     public RedisSentinel build() {
         tryResolveConfAndExec();
-        return new RedisSentinel(port, buildCommandArgs());
+        return new RedisSentinel(port, buildCommandArgs(), forceStop);
     }
 
     private void tryResolveConfAndExec() {

@@ -1,5 +1,7 @@
 package redis.embedded;
 
+import redis.embedded.util.CheckedRunnable;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -14,14 +16,16 @@ public abstract class RedisInstance implements Redis {
     private final Pattern readyPattern;
     private final int port;
     private final List<String> args;
+    private final boolean forceStop;
 
     private volatile boolean active = false;
     private Process process;
 
-    protected RedisInstance(final int port, final List<String> args, final Pattern readyPattern) {
+    protected RedisInstance(final int port, final List<String> args, final Pattern readyPattern, final boolean forceStop) {
         this.port = port;
         this.args = args;
         this.readyPattern = readyPattern;
+        this.forceStop = forceStop;
     }
 
     public synchronized void start() throws IOException {
@@ -31,7 +35,10 @@ public abstract class RedisInstance implements Redis {
             process = new ProcessBuilder(args)
                 .directory(new File(args.get(0)).getParentFile())
                 .start();
-            addShutdownHook("RedisInstanceCleaner", checkedToRuntime(this::stop));
+            addShutdownHook("RedisInstanceCleaner", checkedToRuntime(new CheckedRunnable() {
+                public void run() throws Exception {
+                }
+            }));
             logStream(process.getErrorStream(), System.out::println);
             awaitServerReady();
 
@@ -51,8 +58,12 @@ public abstract class RedisInstance implements Redis {
         if (!active) return;
 
         try {
-            process.destroy();
-            process.waitFor();
+            if (forceStop)
+                process.destroyForcibly();
+            else {
+                process.destroy();
+                process.waitFor();
+            }
             active = false;
         } catch (InterruptedException e) {
             throw new IOException("Failed to stop redis service", e);

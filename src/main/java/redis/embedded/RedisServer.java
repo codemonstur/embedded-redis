@@ -15,25 +15,25 @@ public final class RedisServer extends RedisInstance {
     }
 
     public RedisServer(final int port) throws IOException {
-        this(port, newRedisServer().port(port).buildCommandArgs());
+        this(port, newRedisServer().port(port).buildCommandArgs(), false);
 	}
 
     public RedisServer(final int port, final File executable) {
-        this(port, Arrays.asList(
-            executable.getAbsolutePath(),
-            "--port", Integer.toString(port)
-        ));
+        this( port
+            , Arrays.asList(executable.getAbsolutePath(), "--port", Integer.toString(port))
+            , false
+            );
     }
 
     public RedisServer(final int port, final ExecutableProvider executableProvider) throws IOException {
-        this(port, Arrays.asList(
-            executableProvider.get().getAbsolutePath(),
-            "--port", Integer.toString(port)
-        ));
+        this( port
+            , Arrays.asList(executableProvider.get().getAbsolutePath(), "--port", Integer.toString(port))
+            , false
+            );
     }
 
-    public RedisServer(final int port, final List<String> args) {
-        super(port, args, SERVER_READY_PATTERN);
+    public RedisServer(final int port, final List<String> args, final boolean forceStop) {
+        super(port, args, SERVER_READY_PATTERN, forceStop);
     }
 
     public static RedisServerBuilder newRedisServer() {

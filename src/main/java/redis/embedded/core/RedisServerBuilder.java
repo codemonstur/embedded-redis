@@ -24,6 +24,7 @@ public final class RedisServerBuilder {
     private String bindAddress = "127.0.0.1";
     private int bindPort = DEFAULT_REDIS_PORT;
     private InetSocketAddress slaveOf;
+    private boolean forceStop = false;
 
     private StringBuilder redisConfigBuilder = new StringBuilder();
 
@@ -70,8 +71,13 @@ public final class RedisServerBuilder {
         return this;
     }
 
+    public RedisServerBuilder onShutdownForceStop(final boolean forceStop) {
+        this.forceStop = forceStop;
+        return this;
+    }
+
     public RedisServer build() throws IOException {
-        return new RedisServer(bindPort, buildCommandArgs());
+        return new RedisServer(bindPort, buildCommandArgs(), forceStop);
     }
 
     public void reset() {
