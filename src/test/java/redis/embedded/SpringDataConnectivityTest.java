@@ -20,10 +20,10 @@ public class SpringDataConnectivityTest {
 
     @Before
     public void setUp() throws IOException {
-        redisServer = new RedisServer(6379);
+        redisServer = new RedisServer(6381);
         redisServer.start();
 
-        JedisShardInfo shardInfo = new JedisShardInfo("localhost", 6379);
+        JedisShardInfo shardInfo = new JedisShardInfo("localhost", 6381);
         connectionFactory = new JedisConnectionFactory();
         connectionFactory.setShardInfo(shardInfo);
 

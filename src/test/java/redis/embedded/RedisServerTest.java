@@ -21,7 +21,7 @@ public class RedisServerTest {
 
 	@Test(timeout = 1500L)
 	public void testSimpleRun() throws Exception {
-		redisServer = new RedisServer(6379);
+		redisServer = new RedisServer(6381);
 		redisServer.start();
 		Thread.sleep(1000L);
 		redisServer.stop();
@@ -30,7 +30,7 @@ public class RedisServerTest {
 	@Test
 	public void shouldAllowMultipleRunsWithoutStop() throws IOException {
 		try {
-			redisServer = new RedisServer(6379);
+			redisServer = new RedisServer(6381);
 			redisServer.start();
 			redisServer.start();
 		} finally {
@@ -40,7 +40,7 @@ public class RedisServerTest {
 
 	@Test
 	public void shouldAllowSubsequentRuns() throws IOException {
-		redisServer = new RedisServer(6379);
+		redisServer = new RedisServer(6381);
 		redisServer.start();
 		redisServer.stop();
 
@@ -53,10 +53,10 @@ public class RedisServerTest {
 
 	@Test
 	public void testSimpleOperationsAfterRun() throws IOException {
-		redisServer = new RedisServer(6379);
+		redisServer = new RedisServer(6381);
 		redisServer.start();
 
-		try (final JedisPool pool = new JedisPool("localhost", 6379);
+		try (final JedisPool pool = new JedisPool("localhost", 6381);
              final Jedis jedis = pool.getResource()) {
 			jedis.mset("abc", "1", "def", "2");
 
@@ -70,13 +70,13 @@ public class RedisServerTest {
 
     @Test
     public void shouldIndicateInactiveBeforeStart() throws IOException {
-        redisServer = new RedisServer(6379);
+        redisServer = new RedisServer(6381);
         assertFalse(redisServer.isActive());
     }
 
     @Test
     public void shouldIndicateActiveAfterStart() throws IOException {
-        redisServer = new RedisServer(6379);
+        redisServer = new RedisServer(6381);
         redisServer.start();
         assertTrue(redisServer.isActive());
         redisServer.stop();
@@ -84,7 +84,7 @@ public class RedisServerTest {
 
     @Test
     public void shouldIndicateInactiveAfterStop() throws IOException {
-        redisServer = new RedisServer(6379);
+        redisServer = new RedisServer(6381);
         redisServer.start();
         redisServer.stop();
         assertFalse(redisServer.isActive());
