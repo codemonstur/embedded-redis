@@ -1,0 +1,3 @@
+0.13.0
+
+Fixed shutdown hook
