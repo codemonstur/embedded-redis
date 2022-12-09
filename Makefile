@@ -21,6 +21,9 @@ clean:
 	@echo "[$(NAME)] Cleaning"
 	@mvn -Dorg.slf4j.simpleLogger.defaultLogLevel=warn clean
 
+# The tests are turned off because they fail. The problem is that I run a local instance of Redis and
+# it prevents the test redis instance from starting up. I would like the tests to use a random available
+# port but I haven't fixed them yet.
 build:
 	@echo "[$(NAME)] Building"
 	@mvn -Dorg.slf4j.simpleLogger.defaultLogLevel=warn -DskipTests=true clean package
