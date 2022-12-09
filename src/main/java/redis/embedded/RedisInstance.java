@@ -35,10 +35,7 @@ public abstract class RedisInstance implements Redis {
             process = new ProcessBuilder(args)
                 .directory(new File(args.get(0)).getParentFile())
                 .start();
-            addShutdownHook("RedisInstanceCleaner", checkedToRuntime(new CheckedRunnable() {
-                public void run() throws Exception {
-                }
-            }));
+            addShutdownHook("RedisInstanceCleaner", checkedToRuntime(this::stop));
             logStream(process.getErrorStream(), System.out::println);
             awaitServerReady();
 
