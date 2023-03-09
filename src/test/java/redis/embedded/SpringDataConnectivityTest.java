@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import redis.clients.jedis.JedisShardInfo;
 
 import java.io.IOException;
 
@@ -23,9 +22,10 @@ public class SpringDataConnectivityTest {
         redisServer = new RedisServer(6381);
         redisServer.start();
 
-        JedisShardInfo shardInfo = new JedisShardInfo("localhost", 6381);
         connectionFactory = new JedisConnectionFactory();
-        connectionFactory.setShardInfo(shardInfo);
+        connectionFactory.getStandaloneConfiguration().setHostName("localhost");
+        connectionFactory.getStandaloneConfiguration().setPort(6381);
+        connectionFactory.afterPropertiesSet();
 
         template = new StringRedisTemplate();
         template.setConnectionFactory(connectionFactory);
