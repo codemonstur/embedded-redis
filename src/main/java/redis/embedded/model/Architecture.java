@@ -19,20 +19,10 @@ public enum Architecture {
         return isWindows64Bit(arch, wow64Arch) ? x86_64 : x86;
     }
 
-    public static Architecture detectUnixArchitecture() {
+    public static Architecture detectUnixMacOSXArchitecture() {
         try (final Stream<String> lines = processToLines("uname -m")) {
             return lines.filter(Architecture::isUnix64Bit)
-                .map(line -> line.contains("aarch64") ? aarch64:  x86_64)
-                .findFirst().orElse(x86);
-        } catch (IOException e) {
-            throw new OsArchitectureNotFound(e);
-        }
-    }
-
-    public static Architecture detectMacOSXArchitecture() {
-        try (final Stream<String> lines = processToLines("sysctl hw")) {
-            return lines.filter(Architecture::isMacOS64Bit)
-                .map(line -> x86_64)
+                .map(line -> line.contains("aarch64") || line.contains("arm64") ? aarch64:  x86_64)
                 .findFirst().orElse(x86);
         } catch (IOException e) {
             throw new OsArchitectureNotFound(e);
@@ -45,10 +35,6 @@ public enum Architecture {
 
     private static boolean isUnix64Bit(final String line) {
         return !line.isEmpty() && line.contains("64");
-    }
-
-    private static boolean isMacOS64Bit(final String line) {
-        return !line.isEmpty() && line.contains("cpu64bit_capable") && line.trim().endsWith("1");
     }
 
 }

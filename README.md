@@ -83,7 +83,7 @@ Use this to generate your own binary and then configure it.
 
 ```java
 final ExecutableProvider executables = new ExecutableProviderBuilder()
-    .add2_8_19()
+    .addProvidedVersions()
     .put(OS.UNIX, Architecture.aarch64, "/path/to/resource/redis-server-arm")
     .build();
 
@@ -161,9 +161,10 @@ Redis version
 ==============
 
 When not provided with the desired redis executable, RedisServer runs os-dependent executable enclosed in jar. Currently is uses:
-- Redis 2.8.19 in case of Linux/Unix
-- Redis 2.8.19 in case of OSX
-- Redis 2.8.19 in case of Windows: https://github.com/MSOpenTech/redis/releases/tag/win-2.8.19
+- Redis 6.2.6-v5 in case of Linux/Unix x64 or arm64 ([x64 source](https://packages.redis.io/redis-stack/redis-stack-server-6.2.6-v5.jammy.x86_64.tar.gz), [arm64 source](https://packages.redis.io/redis-stack/redis-stack-server-6.2.6-v5.jammy.arm64.tar.gz))
+- Redis 6.2.7 in case of Linux/Unix x86 ([source](https://github.com/signalapp/embedded-redis/tree/2aee2439c3314dba5d03a09dda1897d891f774b3/src/main/resources))
+- Redis 6.2.6-v5 in case of OSX x64 or arm64 ([x64 source](https://packages.redis.io/redis-stack/redis-stack-server-6.2.6-v5.catalina.x86_64.zip), [arm64 source](https://packages.redis.io/redis-stack/redis-stack-server-6.2.6-v5.monterey.arm64.zip))
+- Redis 5.0.14.1 in case of Windows x64 ([source](https://github.com/tporadowski/redis/releases/tag/v5.0.14.1))
 
 However, you should provide RedisServer with redis executable if you need specific version.
 

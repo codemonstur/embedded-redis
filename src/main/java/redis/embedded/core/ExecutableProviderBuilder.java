@@ -8,13 +8,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static redis.embedded.core.ExecutableProvider.newJarResourceProvider;
-import static redis.embedded.core.ExecutableProvider.newRedis2_8_19Map;
+import static redis.embedded.core.ExecutableProvider.newProvidedVersionsMap;
 
 public class ExecutableProviderBuilder {
     private final Map<OsArchitecture, String> map = new HashMap<>();
 
-    public ExecutableProviderBuilder add2_8_19() {
-        map.putAll(newRedis2_8_19Map());
+    public ExecutableProviderBuilder addProvidedVersions() {
+        map.putAll(newProvidedVersionsMap());
         return this;
     }
 
