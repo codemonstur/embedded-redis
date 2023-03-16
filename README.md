@@ -160,9 +160,9 @@ second replication group on ```6387, 6379``` and third replication group on ephe
 Redis version
 ==============
 
-When not provided with the desired redis executable, RedisServer runs os-dependent executable enclosed in jar. Currently is uses:
-- Redis 6.2.6-v5 in case of Linux/Unix x64 or arm64 ([x64 source](https://packages.redis.io/redis-stack/redis-stack-server-6.2.6-v5.jammy.x86_64.tar.gz), [arm64 source](https://packages.redis.io/redis-stack/redis-stack-server-6.2.6-v5.jammy.arm64.tar.gz))
-- Redis 6.2.7 in case of Linux/Unix x86 ([source](https://github.com/signalapp/embedded-redis/tree/2aee2439c3314dba5d03a09dda1897d891f774b3/src/main/resources))
+When not provided with the desired redis executable, RedisServer runs os-dependent executable enclosed in jar. Currently it uses:
+- Redis 6.2.7 in case of Linux/Unix x86 or arm64 ([x86 source](https://github.com/signalapp/embedded-redis/blob/2aee2439c3314dba5d03a09dda1897d891f774b3/src/main/resources/redis-server-6.2.7-linux-386), [arm64 source](https://github.com/signalapp/embedded-redis/blob/2aee2439c3314dba5d03a09dda1897d891f774b3/src/main/resources/redis-server-6.2.7-linux-arm64))
+- Redis 6.2.6-v5 in case of Linux/Unix x64 ([source](https://packages.redis.io/redis-stack/redis-stack-server-6.2.6-v5.jammy.x86_64.tar.gz))
 - Redis 6.2.6-v5 in case of OSX x64 or arm64 ([x64 source](https://packages.redis.io/redis-stack/redis-stack-server-6.2.6-v5.catalina.x86_64.zip), [arm64 source](https://packages.redis.io/redis-stack/redis-stack-server-6.2.6-v5.monterey.arm64.zip))
 - Redis 5.0.14.1 in case of Windows x64 ([source](https://github.com/tporadowski/redis/releases/tag/v5.0.14.1))
 

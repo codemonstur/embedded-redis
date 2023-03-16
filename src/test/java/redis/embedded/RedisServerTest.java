@@ -95,7 +95,7 @@ public class RedisServerTest {
         ExecutableProvider customProvider = new ExecutableProviderBuilder()
                 .put(UNIX, x86, "/redis-server-6.2.7-linux-386")
                 .put(UNIX, x86_64, "/redis-server-6.2.6-v5-linux-amd64")
-                .put(UNIX, aarch64, "/redis-server-6.2.6-v5-linux-arm64")
+                .put(UNIX, aarch64, "/redis-server-6.2.7-linux-arm64")
                 .put(WINDOWS, x86_64, "/redis-server-5.0.14.1-windows-amd64.exe")
                 .put(MAC_OS_X, x86_64, "/redis-server-6.2.6-v5-darwin-amd64")
                 .put(MAC_OS_X, aarch64, "/redis-server-6.2.6-v5-darwin-arm64")
