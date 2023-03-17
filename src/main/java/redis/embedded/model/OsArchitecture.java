@@ -10,13 +10,12 @@ import static redis.embedded.model.OS.WINDOWS;
 public class OsArchitecture {
     
     public static final OsArchitecture
-        WINDOWS_x86 = new OsArchitecture(WINDOWS, x86),
         WINDOWS_x86_64 = new OsArchitecture(WINDOWS, x86_64),
         UNIX_x86 = new OsArchitecture(UNIX, x86),
         UNIX_x86_64 = new OsArchitecture(UNIX, x86_64),
         UNIX_AARCH64 = new OsArchitecture(UNIX, aarch64),
-        MAC_OS_X_x86 = new OsArchitecture(MAC_OS_X, x86),
-        MAC_OS_X_x86_64 = new OsArchitecture(MAC_OS_X, x86_64);
+        MAC_OS_X_x86_64 = new OsArchitecture(MAC_OS_X, x86_64),
+        MAC_OS_X_ARM64 = new OsArchitecture(MAC_OS_X, aarch64);
 
     public final OS os;
     public final Architecture arch;

@@ -6,8 +6,8 @@ import java.util.function.Supplier;
 
 public enum OS {
     WINDOWS(Architecture::detectWindowsArchitecture),
-    UNIX(Architecture::detectUnixArchitecture),
-    MAC_OS_X(Architecture::detectMacOSXArchitecture);
+    UNIX(Architecture::detectUnixMacOSXArchitecture),
+    MAC_OS_X(Architecture::detectUnixMacOSXArchitecture);
 
     private final Supplier<Architecture> archSupplier;
     OS(final Supplier<Architecture> archSupplier) {

@@ -19,8 +19,8 @@ public interface ExecutableProvider {
 
     File get() throws IOException;
 
-    static ExecutableProvider newEmbeddedRedis2_8_19Provider() {
-        final Map<OsArchitecture, String> executables = newRedis2_8_19Map();
+    static ExecutableProvider newEmbeddedRedisProvider() {
+        final Map<OsArchitecture, String> executables = newProvidedVersionsMap();
         return () -> writeResourceToExecutableFile(executables.get(detectOSandArchitecture()));
     }
 
@@ -54,15 +54,14 @@ public interface ExecutableProvider {
         return findBinaryInPath(executableName)::toFile;
     }
 
-    static Map<OsArchitecture, String> newRedis2_8_19Map() {
+    static Map<OsArchitecture, String> newProvidedVersionsMap() {
         final Map<OsArchitecture, String> map = new HashMap<>();
-        map.put(WINDOWS_x86, "/redis-server-2.8.19.exe");
-        map.put(WINDOWS_x86_64, "/redis-server-2.8.19.exe");
-        map.put(UNIX_x86, "/redis-server-2.8.19-32");
-        map.put(UNIX_x86_64, "/redis-server-2.8.19");
-        map.put(UNIX_AARCH64, "/redis-server-2.8.19-linux-aarch64");
-        map.put(MAC_OS_X_x86, "/redis-server-2.8.19.app");
-        map.put(MAC_OS_X_x86_64, "/redis-server-2.8.19.app");
+        map.put(UNIX_x86, "/redis-server-6.2.7-linux-386");
+        map.put(UNIX_x86_64, "/redis-server-6.2.6-v5-linux-amd64");
+        map.put(UNIX_AARCH64, "/redis-server-6.2.7-linux-arm64");
+        map.put(WINDOWS_x86_64, "/redis-server-5.0.14.1-windows-amd64.exe");
+        map.put(MAC_OS_X_x86_64, "/redis-server-6.2.6-v5-darwin-amd64");
+        map.put(MAC_OS_X_ARM64, "/redis-server-6.2.6-v5-darwin-arm64");
         return map;
     }
 
