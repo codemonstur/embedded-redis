@@ -26,11 +26,12 @@ clean:
 # port but I haven't fixed them yet.
 build:
 	@echo "[$(NAME)] Building"
-	@mvn -Dorg.slf4j.simpleLogger.defaultLogLevel=warn -DskipTests=true clean package
+	@mvn -Dorg.slf4j.simpleLogger.defaultLogLevel=warn -DskipTests clean package
 
-check-versions:
-	@mvn versions:display-dependency-updates
-	@mvn versions:display-plugin-updates
+update:
+	@mvn versions:display-dependency-updates -Dorg.slf4j.simpleLogger.defaultLogLevel=info
+	@mvn versions:display-plugin-updates -Dorg.slf4j.simpleLogger.defaultLogLevel=info
+	@mvn org.owasp:dependency-check-maven:8.1.2:check -Dorg.slf4j.simpleLogger.defaultLogLevel=info
 
 list-dependencies:
 	@mvn dependency:tree

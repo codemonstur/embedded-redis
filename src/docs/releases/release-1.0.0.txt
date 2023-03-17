@@ -1,0 +1,5 @@
+1.0.0
+
+Updated Redis versions to latest that can be downloaded
+Removed support for Windows 32bit (Use older version or provide your own binaries)
+Removed support for MacOs 32bit (Use older version or provide your own binaries)
