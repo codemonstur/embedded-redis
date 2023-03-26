@@ -18,7 +18,7 @@ Maven Central:
 <dependency>
   <groupId>com.github.codemonstur</groupId>
   <artifactId>embedded-redis</artifactId>
-  <version>0.13.0</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 
@@ -35,23 +35,12 @@ redisServer.stop();
 
 You can also provide RedisServer with your own executable:
 ```java
-// 1) given explicit file (os-independence broken!)
-RedisServer redisServer = new RedisServer("/path/to/your/redis", 6379);
-
-// 2) given os-independent matrix
-ExecutableProvider customProvider = new ExecutableProviderBuilder()
-    .put(OS.UNIX, "/path/to/unix/redis")
-    .put(OS.WINDOWS, Architecture.x86, "/path/to/windows/redis")
-    .put(OS.WINDOWS, Architecture.x86_64, "/path/to/windows/redis")
-    .put(OS.MAC_OS_X, Architecture.x86, "/path/to/macosx/redis")
-    .put(OS.MAC_OS_X, Architecture.x86_64, "/path/to/macosx/redis")
-  
-RedisServer redisServer = new RedisServer(6379, customProvider);
+RedisServer redisServer = new RedisServer(6379, new File("/path/to/your/redis"));
 ```
 
 You can also use fluent API to create RedisServer:
 ```java
-RedisServer redisServer = RedisServer.builder()
+RedisServer redisServer = RedisServer.newRedisServer()
   .executableProvider(customRedisProvider)
   .port(6379)
   .slaveOf("locahost", 6378)
@@ -61,7 +50,7 @@ RedisServer redisServer = RedisServer.builder()
 
 Or even create simple redis.conf file from scratch:
 ```java
-RedisServer redisServer = RedisServer.builder()
+RedisServer redisServer = RedisServer.newRedisServer()
   .executableProvider(customRedisProvider)
   .port(6379)
   .setting("bind 127.0.0.1") // good for local development on Windows to prevent security popups
@@ -70,24 +59,6 @@ RedisServer redisServer = RedisServer.builder()
   .setting("appendonly no")
   .setting("maxmemory 128M")
   .build();
-```
-
-## Using ARM hardware
-
-The library contains a pre-compiled binary for ARM architecture.
-However, this binary was generated using the QEMU emulator and did not work with the Redis tests.
-It is not known whether it will actually work.
-
-The makefile contains a target (build-arm) that will generate a binary from Redis source.
-Use this to generate your own binary and then configure it.
-
-```java
-final ExecutableProvider executables = new ExecutableProviderBuilder()
-    .addProvidedVersions()
-    .put(OS.UNIX, Architecture.aarch64, "/path/to/resource/redis-server-arm")
-    .build();
-
-new RedisServer(Redis.DEFAULT_REDIS_PORT, executables);
 ```
 
 ## Setting up a cluster
@@ -99,26 +70,32 @@ A simple redis integration test with Redis cluster on ephemeral ports, with setu
 ```java
 public class SomeIntegrationTestThatRequiresRedis {
   private RedisCluster cluster;
-  private Set<String> jedisSentinelHosts;
 
   @Before
   public void setup() throws Exception {
+    String bindAddress = Inet4Address.getLocalHost().getHostAddress();
+    RedisSentinelBuilder sentinelBuilder = RedisSentinel.newRedisSentinel();
+    sentinelBuilder.bind(bindAddress);
+
     //creates a cluster with 3 sentinels, quorum size of 2 and 3 replication groups, each with one master and one slave
-    cluster = RedisCluster.builder().ephemeral().sentinelCount(3).quorumSize(2)
+    cluster =
+            RedisCluster.newRedisCluster()
+                    .withSentinelBuilder(sentinelBuilder)
+                    .ephemeralServers()
+                    .sentinelStartingPort(26400)
+                    .sentinelCount(3)
+                    .quorumSize(2)
                     .replicationGroup("master1", 1)
                     .replicationGroup("master2", 1)
                     .replicationGroup("master3", 1)
                     .build();
     cluster.start();
-
-    //retrieve ports on which sentinels have been started, using a simple Jedis utility class
-    jedisSentinelHosts = JedisUtil.sentinelHosts(cluster);
   }
   
-  @TestApp
+  @Test
   public void test() throws Exception {
     // testing code that requires redis running
-    JedisSentinelPool pool = new JedisSentinelPool("master1", jedisSentinelHosts);
+    JedisSentinelPool pool = new JedisSentinelPool("master1", Set.of("localhost:26400", "localhost:26401", "localhost:26402"));
   }
   
   @After
@@ -129,33 +106,7 @@ public class SomeIntegrationTestThatRequiresRedis {
 ```
 
 #### Retrieving ports
-The above example starts Redis cluster on ephemeral ports, which you can later get with ```cluster.ports()```,
-which will return a list of all ports of the cluster. You can also get ports of sentinels with ```cluster.sentinelPorts()```
-or servers with ```cluster.serverPorts()```. ```JedisUtil``` class contains utility methods for use with Jedis client.
-
-#### Using predefined ports
-You can also start Redis cluster on predefined ports and even mix both approaches:
-```java
-public class SomeIntegrationTestThatRequiresRedis {
-  private RedisCluster cluster;
-
-  @Before
-  public void setup() throws Exception {
-    final List<Integer> sentinels = Arrays.asList(26739, 26912);
-    final List<Integer> group1 = Arrays.asList(6667, 6668);
-    final List<Integer> group2 = Arrays.asList(6387, 6379);
-    //creates a cluster with 2 sentinels, quorum size of 2 and 3 replication groups, each with one master and one slave
-    cluster = RedisCluster.builder().sentinelPorts(sentinels).quorumSize(2)
-                    .serverPorts(group1).replicationGroup("master1", 1)
-                    .serverPorts(group2).replicationGroup("master2", 1)
-                    .ephemeralServers().replicationGroup("master3", 1)
-                    .build();
-    cluster.start();
-  }
-//(...)
-```
-The above will create and start a cluster with sentinels on ports ```26739, 26912```, first replication group on ```6667, 6668```,
-second replication group on ```6387, 6379``` and third replication group on ephemeral ports.
+The above example starts Redis cluster with servers on ephemeral ports and sentinels on ports 26400, 26401 and 26402. You can later get ports of servers with ```cluster.serverPorts()```, sentinels with ```cluster.sentinelPorts()``` or all ports with ```cluster.ports()```.
 
 Redis version
 ==============
