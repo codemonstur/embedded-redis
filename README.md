@@ -63,7 +63,9 @@ RedisServer redisServer = RedisServer.newRedisServer()
 
 ## Setting up a cluster
 
-Our Embedded Redis has support for HA Redis clusters with Sentinels and master-slave replication
+Our Embedded Redis has support for:
+- HA Redis clusters with Sentinels and master-slave replication
+- Sharded Redis clusters with node replication
 
 #### Using ephemeral ports
 A simple redis integration test with Redis cluster on ephemeral ports, with setup similar to that from production would look like this:
@@ -105,6 +107,8 @@ public class SomeIntegrationTestThatRequiresRedis {
 }
 ```
 
+For an example of setting up a sharded redis cluster check out the code in `RedisShardedServerClusterTest`.
+
 #### Retrieving ports
 The above example starts Redis cluster with servers on ephemeral ports and sentinels on ports 26400, 26401 and 26402. You can later get ports of servers with ```cluster.serverPorts()```, sentinels with ```cluster.sentinelPorts()``` or all ports with ```cluster.ports()```.
 
@@ -133,3 +137,4 @@ Contributors
  * Artem Orobets ([@enisher](http://github.com/enisher))
  * Sean Simonsen ([@SeanSimonsen](http://github.com/SeanSimonsen))
  * Rob Winch ([@rwinch](http://github.com/rwinch))
+ * Cristian Badila ([@cristi-badila](http://github.com/cristi-badila))
