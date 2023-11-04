@@ -1,5 +1,6 @@
 package redis.embedded.core;
 
+import redis.embedded.RedisCluster;
 import redis.embedded.RedisServer;
 
 import java.io.File;
@@ -10,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static redis.embedded.Redis.DEFAULT_REDIS_PORT;
@@ -25,6 +27,8 @@ public final class RedisServerBuilder {
     private int bindPort = DEFAULT_REDIS_PORT;
     private InetSocketAddress slaveOf;
     private boolean forceStop = false;
+    private Consumer<String> soutListener;
+    private Consumer<String> serrListener;
 
     private StringBuilder redisConfigBuilder = new StringBuilder();
 
@@ -76,8 +80,17 @@ public final class RedisServerBuilder {
         return this;
     }
 
+    public RedisServerBuilder soutListener(final Consumer<String> soutListener) {
+        this.soutListener = soutListener;
+        return this;
+    }
+    public RedisServerBuilder serrListener(final Consumer<String> serrListener) {
+        this.serrListener = serrListener;
+        return this;
+    }
+
     public RedisServer build() throws IOException {
-        return new RedisServer(bindPort, buildCommandArgs(), forceStop);
+        return new RedisServer(bindPort, buildCommandArgs(), forceStop, soutListener, serrListener);
     }
 
     public void reset() {
@@ -87,6 +100,8 @@ public final class RedisServerBuilder {
         this.provider = newEmbeddedRedisProvider();
         this.bindAddress = "127.0.0.1";
         this.bindPort = DEFAULT_REDIS_PORT;
+        this.soutListener = null;
+        this.serrListener = null;
     }
 
     public List<String> buildCommandArgs() throws IOException {

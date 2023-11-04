@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static redis.embedded.Redis.DEFAULT_REDIS_PORT;
@@ -34,6 +35,8 @@ public final class RedisSentinelBuilder {
     private int quorumSize = 1;
     private String sentinelConf;
     private boolean forceStop = false;
+    private Consumer<String> soutListener;
+    private Consumer<String> serrListener;
 
     private StringBuilder redisConfigBuilder;
 
@@ -62,7 +65,7 @@ public final class RedisSentinelBuilder {
         return this;
     }
 
-    public RedisSentinelBuilder quorumSize(int quorumSize) {
+    public RedisSentinelBuilder quorumSize(final int quorumSize) {
         this.quorumSize = quorumSize;
         return this;
     }
@@ -113,9 +116,18 @@ public final class RedisSentinelBuilder {
         return this;
     }
 
+    public RedisSentinelBuilder soutListener(final Consumer<String> soutListener) {
+        this.soutListener = soutListener;
+        return this;
+    }
+    public RedisSentinelBuilder serrListener(final Consumer<String> serrListener) {
+        this.serrListener = serrListener;
+        return this;
+    }
+
     public RedisSentinel build() {
         tryResolveConfAndExec();
-        return new RedisSentinel(port, buildCommandArgs(), forceStop);
+        return new RedisSentinel(port, buildCommandArgs(), forceStop, soutListener, serrListener);
     }
 
     private void tryResolveConfAndExec() {
@@ -124,7 +136,7 @@ public final class RedisSentinelBuilder {
                 resolveSentinelConf();
             }
             executable = executableProvider.get();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new IllegalArgumentException("Could not build sentinel instance", e);
         }
     }
@@ -149,7 +161,7 @@ public final class RedisSentinelBuilder {
         setting(String.format(LINE_PORT, port));
         final String configString = redisConfigBuilder.toString();
 
-        File redisConfigFile = File.createTempFile(resolveConfigName(), ".conf");
+        final File redisConfigFile = File.createTempFile(resolveConfigName(), ".conf");
         redisConfigFile.deleteOnExit();
         Files.write(redisConfigFile.toPath(), configString.getBytes(UTF_8));
         sentinelConf = redisConfigFile.getAbsolutePath();
@@ -160,7 +172,7 @@ public final class RedisSentinelBuilder {
     }
 
     private List<String> buildCommandArgs() {
-        List<String> args = new ArrayList<>();
+        final List<String> args = new ArrayList<>();
         args.add(executable.getAbsolutePath());
         args.add(sentinelConf);
         args.add("--sentinel");

@@ -84,10 +84,10 @@ public final class RedisShardedCluster implements Redis {
             meetMainNodes(clusterMeetTarget);
             setupReplicas(clusterMeetTarget);
             waitForClusterToBeInteractReady();
-        } catch (RedisClusterSetupException e) {
+        } catch (final RedisClusterSetupException e) {
             try {
                 this.stop();
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 throw new RuntimeException(ex);
             }
             throw new RuntimeException(e);
@@ -119,16 +119,16 @@ public final class RedisShardedCluster implements Redis {
     }
 
     private void setupReplicas(final Integer clusterMeetTarget) throws RedisClusterSetupException {
-        for (Map.Entry<Integer, Set<Integer>> entry : replicasPortsByMainNodePort.entrySet()) {
+        for (final Map.Entry<Integer, Set<Integer>> entry : replicasPortsByMainNodePort.entrySet()) {
             final String mainNodeId = mainNodeIdsByPort.get(entry.getKey());
             final Set<Integer> replicaPorts = entry.getValue();
-            for (Integer replicaPort : replicaPorts) {
-                try (Jedis jedis = new Jedis(CLUSTER_IP, replicaPort)) {
+            for (final Integer replicaPort : replicaPorts) {
+                try (final Jedis jedis = new Jedis(CLUSTER_IP, replicaPort)) {
                     jedis.clusterMeet(CLUSTER_IP, clusterMeetTarget);
                     waitForNodeToAppearInCluster(jedis, mainNodeId); // make sure main node visible in cluster
                     jedis.clusterReplicate(mainNodeId);
                     waitForClusterToHaveStatusOK(jedis);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     throw new RedisClusterSetupException("Failed adding replica instance at port: " + replicaPort, e);
                 }
             }
@@ -136,21 +136,21 @@ public final class RedisShardedCluster implements Redis {
     }
 
     private void waitForNodeToAppearInCluster(final Jedis jedis, final String nodeId) throws RedisClusterSetupException {
-        boolean nodeReady = waitForPredicateToPass(() -> jedis.clusterNodes().contains(nodeId));
+        final boolean nodeReady = waitForPredicateToPass(() -> jedis.clusterNodes().contains(nodeId));
         if (!nodeReady) { throw new RedisClusterSetupException("Node was not ready before timeout"); }
     }
 
     private void waitForClusterToHaveStatusOK(final Jedis jedis) throws RedisClusterSetupException {
-        boolean clusterIsReady = waitForPredicateToPass(() -> jedis.clusterInfo().contains("cluster_state:ok"));
+        final boolean clusterIsReady = waitForPredicateToPass(() -> jedis.clusterInfo().contains("cluster_state:ok"));
         if (!clusterIsReady) { throw new RedisClusterSetupException("Cluster did not have status OK before timeout"); }
     }
 
     private void waitForClusterToBeInteractReady() throws RedisClusterSetupException {
-        boolean clusterIsReady = waitForPredicateToPass(() -> {
-            try (JedisCluster jc = new JedisCluster(new HostAndPort(CLUSTER_IP, getPort()))) {
+        final boolean clusterIsReady = waitForPredicateToPass(() -> {
+            try (final JedisCluster jc = new JedisCluster(new HostAndPort(CLUSTER_IP, getPort()))) {
                 jc.get("someKey");
                 return true;
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // ignore
                 return false;
             }
@@ -159,13 +159,14 @@ public final class RedisShardedCluster implements Redis {
     }
 
     private boolean waitForPredicateToPass(final Supplier<Boolean> predicate) throws RedisClusterSetupException {
+        final long maxWaitInMillis = initializationTimeout.toMillis();
+
         int waited = 0;
-        long maxWaitInMillis = initializationTimeout.toMillis();
         boolean result = predicate.get();
         while (!result && waited < maxWaitInMillis) {
             try {
                 Thread.sleep(SLEEP_DURATION_IN_MILLIS);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 throw new RedisClusterSetupException("Interrupted while waiting", e);
             }
             waited += SLEEP_DURATION_IN_MILLIS;

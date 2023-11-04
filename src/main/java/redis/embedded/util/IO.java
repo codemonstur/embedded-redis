@@ -34,7 +34,7 @@ public enum IO {;
         return () -> {
             try {
                 runnable.run();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new RuntimeException(e);
             }
         };
@@ -45,13 +45,17 @@ public enum IO {;
     }
 
     public static void logStream(final InputStream stream, final Consumer<String> logConsumer) {
-        new Thread(() -> {
-            try (final BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
-                String line; while ((line = reader.readLine()) != null) {
-                    logConsumer.accept(line);
-                }
-            } catch (IOException e) { /* eat quietly */ }
-        }).start();
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+            String line; while ((line = reader.readLine()) != null) {
+                logConsumer.accept(line);
+            }
+        } catch (final IOException ignored) {}
+    }
+
+    public static Thread newDaemonThread(final Runnable run) {
+        final Thread thread = new Thread(run);
+        thread.setDaemon(true);
+        return thread;
     }
 
     public static boolean findMatchInStream(final InputStream in, final Pattern pattern,
