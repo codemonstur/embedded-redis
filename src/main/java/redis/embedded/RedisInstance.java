@@ -40,7 +40,7 @@ public abstract class RedisInstance implements Redis {
             awaitServerReady();
 
             active = true;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IOException("Failed to start Redis service", e);
         }
     }
@@ -62,7 +62,7 @@ public abstract class RedisInstance implements Redis {
                 process.waitFor();
             }
             active = false;
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             throw new IOException("Failed to stop redis service", e);
         }
     }
