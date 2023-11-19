@@ -1,0 +1,4 @@
+1.1.0
+
+Adds support for configuring a sharded redis cluster compatible with JedisCluster
+Adds code that should allow for better monitoring of output from redis binary
