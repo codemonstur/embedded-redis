@@ -50,7 +50,7 @@ public enum IO {;
                 String line; while ((line = reader.readLine()) != null) {
                     logConsumer.accept(line);
                 }
-            } catch (IOException e) { /* eat quietly */ }
+            } catch (final IOException e) { /* eat quietly */ }
         }).start();
     }
 
@@ -58,9 +58,10 @@ public enum IO {;
                                             final StringBuilder processOutput) throws IOException {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             String line; while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+                processOutput.append('\n').append(line);
                 if (pattern.matcher(line).matches())
                     return true;
-                processOutput.append('\n').append(line);
             }
         }
         return false;
