@@ -108,7 +108,7 @@ public final class RedisServerBuilder {
         setting("bind " + bindAddress);
 
         final Path redisConfigFile =
-            writeNewRedisConfigFile("embedded-redis-server_"+bindPort, redisConfigBuilder.toString());
+            writeNewRedisConfigFile("embedded-redis-server_" + bindPort, redisConfigBuilder.toString());
 
         executable = provider.get();
 
