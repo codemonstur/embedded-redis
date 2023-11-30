@@ -17,16 +17,16 @@ public class RedisShardedClusterTest {
     @Before
     public void setUp() throws IOException {
 		cluster = RedisShardedCluster.newRedisCluster()
-									   .shard("master1", 1)
-									   .shard("master2", 1)
-									   .shard("master3", 1)
-									   .build();
+		   .shard("master1", 1)
+		   .shard("master2", 1)
+		   .shard("master3", 1)
+		   .build();
 		cluster.start();
     }
 
     @Test
     public void testSimpleOperationsAfterClusterStart() {
-        try (JedisCluster jc = new JedisCluster(new HostAndPort(CLUSTER_IP, cluster.getPort()))) {
+        try (final JedisCluster jc = new JedisCluster(new HostAndPort(CLUSTER_IP, cluster.getPort()))) {
             jc.set("somekey", "somevalue");
             assertEquals("the value should be equal", "somevalue", jc.get("somekey"));
         }
@@ -36,12 +36,12 @@ public class RedisShardedClusterTest {
 	public void testSimpleOperationsAfterClusterWithEphemeralPortsStart() throws IOException {
 		cluster.stop();
 		cluster = RedisShardedCluster.newRedisCluster().ephemeral()
-									 .shard("master1", 1)
-									 .shard("master2", 1)
-									 .shard("master3", 1)
-									 .build();
+			 .shard("master1", 1)
+			 .shard("master2", 1)
+			 .shard("master3", 1)
+			 .build();
 		cluster.start();
-		try (JedisCluster jc = new JedisCluster(new HostAndPort(CLUSTER_IP, cluster.getPort()))) {
+		try (final JedisCluster jc = new JedisCluster(new HostAndPort(CLUSTER_IP, cluster.getPort()))) {
 			jc.set("somekey", "somevalue");
 			assertEquals("the value should be equal", "somevalue", jc.get("somekey"));
 		}
@@ -51,4 +51,5 @@ public class RedisShardedClusterTest {
     public void tearDown() throws Exception {
         cluster.stop();
     }
+
 }
