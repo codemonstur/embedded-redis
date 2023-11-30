@@ -129,10 +129,10 @@ public class RedisClusterTest {
     @Test
     public void testSimpleOperationsAfterRunWithSingleMasterAndOneSlave() throws IOException {
         final RedisCluster cluster = newRedisCluster()
-                .withSentinelBuilder(sentinelBuilder)
-                .sentinelCount(1)
-                .replicationGroup("ourmaster", 1)
-                .build();
+            .withSentinelBuilder(sentinelBuilder)
+            .sentinelCount(1)
+            .replicationGroup("ourmaster", 1)
+            .build();
         cluster.start();
 
         JedisSentinelPool pool = null;

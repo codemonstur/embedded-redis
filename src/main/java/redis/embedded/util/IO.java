@@ -62,6 +62,7 @@ public enum IO {;
                                             final StringBuilder processOutput) throws IOException {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             String line; while ((line = reader.readLine()) != null) {
+                System.out.println(line);
                 if (pattern.matcher(line).matches())
                     return true;
                 processOutput.append('\n').append(line);

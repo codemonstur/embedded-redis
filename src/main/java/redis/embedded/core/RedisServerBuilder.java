@@ -23,7 +23,7 @@ public final class RedisServerBuilder {
 
     private File executable;
     private ExecutableProvider provider = newEmbeddedRedisProvider();
-    private String bindAddress = "localhost"; //"127.0.0.1";
+    private String bindAddress = "127.0.0.1";
     private int bindPort = DEFAULT_REDIS_PORT;
     private InetSocketAddress slaveOf;
     private boolean forceStop = false;
