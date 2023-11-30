@@ -1,0 +1,5 @@
+1.2.0
+
+Updated dependencies
+Adds code that should allow for better monitoring of output from redis binary
+-> Actually this time
