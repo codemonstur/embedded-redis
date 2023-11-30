@@ -20,8 +20,7 @@ public class RedisServerClusterTest {
     @Before
     public void setUp() throws IOException {
         redisServer1 = newRedisServer().port(6300).build();
-        redisServer2 = newRedisServer()
-                .port(6301)
+        redisServer2 = newRedisServer().port(6301)
                 .slaveOf("localhost", 6300)
                 .build();
 
@@ -57,4 +56,5 @@ public class RedisServerClusterTest {
         redisServer1.stop();
         redisServer2.stop();
     }
+
 }
