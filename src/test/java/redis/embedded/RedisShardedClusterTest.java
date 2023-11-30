@@ -10,13 +10,14 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static redis.embedded.RedisShardedCluster.CLUSTER_IP;
+import static redis.embedded.RedisShardedCluster.newRedisCluster;
 
 public class RedisShardedClusterTest {
 	private RedisShardedCluster cluster;
 
     @Before
     public void setUp() throws IOException {
-		cluster = RedisShardedCluster.newRedisCluster()
+		cluster = newRedisCluster()
 		   .shard("master1", 1)
 		   .shard("master2", 1)
 		   .shard("master3", 1)
@@ -35,7 +36,7 @@ public class RedisShardedClusterTest {
 	@Test
 	public void testSimpleOperationsAfterClusterWithEphemeralPortsStart() throws IOException {
 		cluster.stop();
-		cluster = RedisShardedCluster.newRedisCluster().ephemeral()
+		cluster = newRedisCluster().ephemeral()
 			 .shard("master1", 1)
 			 .shard("master2", 1)
 			 .shard("master3", 1)
