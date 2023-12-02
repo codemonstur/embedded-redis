@@ -3,3 +3,4 @@
 Added binary for MacOSX 14 Sonoma to the repo
 Added VirusTotal scan result for this binary
 Added ExecutableProvider capable of downloading from a URL
+Fixed bug in redis process output logging
