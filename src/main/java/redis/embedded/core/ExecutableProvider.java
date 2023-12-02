@@ -5,14 +5,9 @@ import redis.embedded.model.OsArchitecture;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.nio.file.Files.*;
@@ -26,6 +21,8 @@ public interface ExecutableProvider {
 
     String ENVIRONMENT_EXECUTABLE_LOCATION = "EMBEDDED_REDIS_EXECUTABLE";
     String PROPERTY_EXECUTABLE_LOCATION = "embedded.redis.executable";
+
+    URI REDIS_7_2_MACOSX_14_SONOMA_HANKCP = URI.create("https://github.com/codemonstur/embedded-redis/raw/master/src/main/binaries/redis-server-7.2-darwin-arm64");
 
     File get() throws IOException;
 
@@ -83,7 +80,7 @@ public interface ExecutableProvider {
                         out.write(buffer, 0, length);
                     }
                 }
-                setPosixFilePermissions(cachedLocation, fromString("rwxr-xr-x"));
+                cachedLocation.toFile().setExecutable(true);
 
                 return cachedLocation.toFile();
             } finally {

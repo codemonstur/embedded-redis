@@ -18,7 +18,7 @@ Maven Central:
 <dependency>
   <groupId>com.github.codemonstur</groupId>
   <artifactId>embedded-redis</artifactId>
-  <version>1.0.0</version>
+  <version>1.2.0</version>
 </dependency>
 ```
 
@@ -60,6 +60,19 @@ RedisServer redisServer = RedisServer.newRedisServer()
   .setting("maxmemory 128M")
   .build();
 ```
+
+## Binaries
+
+Redis binaries are included in the library by default.
+
+When no `ExecutableProvider` is given the code will attempt to discover which OS and Architecture is being used and choose an appropriate binary.
+
+Not all operating systems and architectures are supported.
+If you find that the default binaries do not work your best approach is to compile your own and configure an `ExecutableProvider`.
+
+Additional binaries that are not part of the default set are located in `src/main/binaries` in this project.
+You can use the `ExecutableProvider.newCachedUrlProvider()` to make use of them. (currently only 1 binary)
+Example code how to do this can be found at [src/test/java/tools/DownloadUriTest.java](src/test/java/tools/DownloadUriTest.java).
 
 ## Setting up a cluster
 
