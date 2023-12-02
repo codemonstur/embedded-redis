@@ -1,10 +1,7 @@
 package redis.embedded;
 
-import redis.embedded.util.CheckedRunnable;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -43,13 +40,11 @@ public abstract class RedisInstance implements Redis {
                 .directory(new File(args.get(0)).getParentFile())
                 .start();
             addShutdownHook("RedisInstanceCleaner", checkedToRuntime(this::stop));
-            final String startupLog = awaitServerReady(process, readyPattern);
-            if (soutListener != null) {
-                soutListener.accept(startupLog);
-                newDaemonThread(() -> logStream(process.getInputStream(), soutListener)).start();
-            }
             if (serrListener != null)
                 newDaemonThread(() -> logStream(process.getErrorStream(), serrListener)).start();
+            awaitServerReady(process, readyPattern, soutListener);
+            if (soutListener != null)
+                newDaemonThread(() -> logStream(process.getInputStream(), soutListener)).start();
 
             active = true;
         } catch (final IOException e) {
@@ -57,11 +52,11 @@ public abstract class RedisInstance implements Redis {
         }
     }
 
-    private static String awaitServerReady(final Process process, final Pattern readyPattern) throws IOException {
+    private static void awaitServerReady(final Process process, final Pattern readyPattern,
+                                           final Consumer<String> soutListener) throws IOException {
         final StringBuilder log = new StringBuilder();
-        if (!findMatchInStream(process.getInputStream(), readyPattern, log))
+        if (!findMatchInStream(process.getInputStream(), readyPattern, soutListener, log))
             throw new IOException("Ready pattern not found in log. Startup log: " + log);
-        return log.toString();
     }
 
     public synchronized void stop() throws IOException {

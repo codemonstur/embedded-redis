@@ -58,10 +58,11 @@ public enum IO {;
         return thread;
     }
 
-    public static boolean findMatchInStream(final InputStream in, final Pattern pattern,
-                                            final StringBuilder processOutput) throws IOException {
+    public static boolean findMatchInStream(final InputStream in, final Pattern pattern
+            , final Consumer<String> soutListener, final StringBuilder processOutput) throws IOException {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             String line; while ((line = reader.readLine()) != null) {
+                if (soutListener != null) soutListener.accept(line);
                 processOutput.append('\n').append(line);
                 if (pattern.matcher(line).matches())
                     return true;
