@@ -2,12 +2,22 @@ package redis.embedded.core;
 
 import redis.embedded.model.OsArchitecture;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
+import static java.net.HttpURLConnection.HTTP_OK;
+import static java.nio.file.Files.*;
+import static java.nio.file.StandardOpenOption.*;
+import static java.nio.file.attribute.PosixFilePermissions.fromString;
 import static redis.embedded.model.OsArchitecture.*;
 import static redis.embedded.util.IO.findBinaryInPath;
 import static redis.embedded.util.IO.writeResourceToExecutableFile;
@@ -52,6 +62,34 @@ public interface ExecutableProvider {
 
     static ExecutableProvider newExecutableInPath(final String executableName) throws FileNotFoundException {
         return findBinaryInPath(executableName)::toFile;
+    }
+
+    static ExecutableProvider newCachedUrlProvider(final Path cachedLocation, final URI uri) {
+        return () -> {
+            if (isRegularFile(cachedLocation))
+                return cachedLocation.toFile();
+
+            final HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
+            try {
+                if (connection.getResponseCode() != HTTP_OK)
+                    throw new IOException("Failed to download redis binary from " + uri + ", status code is " + connection.getResponseCode());
+
+                createDirectories(cachedLocation.getParent());
+                try (final OutputStream out = newOutputStream(cachedLocation, CREATE, WRITE, TRUNCATE_EXISTING);
+                     final InputStream in = connection.getInputStream()) {
+
+                    final byte[] buffer = new byte[8192];
+                    int length; while ((length = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, length);
+                    }
+                }
+                setPosixFilePermissions(cachedLocation, fromString("rwxr-xr-x"));
+
+                return cachedLocation.toFile();
+            } finally {
+                connection.disconnect();
+            }
+        };
     }
 
     static Map<OsArchitecture, String> newProvidedVersionsMap() {
