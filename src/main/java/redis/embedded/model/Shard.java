@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public final class Shard {
+
     public final String name;
     public final int mainNodePort;
     public final List<Integer> replicaPorts = new LinkedList<>();
@@ -17,4 +18,5 @@ public final class Shard {
             this.replicaPorts.add(provider.get());
         }
     }
+
 }

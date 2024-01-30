@@ -4,16 +4,20 @@ import org.junit.Test;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.embedded.core.ExecutableProvider;
-import redis.embedded.core.ExecutableProviderBuilder;
+import redis.embedded.model.OsArchitecture;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
 import static redis.embedded.RedisServer.SERVER_READY_PATTERN;
 import static redis.embedded.RedisServer.newRedisServer;
+import static redis.embedded.core.ExecutableProvider.newJarResourceProvider;
 import static redis.embedded.model.Architecture.*;
 import static redis.embedded.model.OS.*;
+import static redis.embedded.model.OsArchitecture.*;
 
 public class RedisServerTest {
 
@@ -92,32 +96,33 @@ public class RedisServerTest {
 
     @Test
     public void shouldOverrideDefaultExecutable() throws IOException {
-        ExecutableProvider customProvider = new ExecutableProviderBuilder()
-                .put(UNIX, x86, "/redis-server-6.2.7-linux-386")
-                .put(UNIX, x86_64, "/redis-server-6.2.6-v5-linux-amd64")
-                .put(UNIX, aarch64, "/redis-server-6.2.7-linux-arm64")
-                .put(WINDOWS, x86_64, "/redis-server-5.0.14.1-windows-amd64.exe")
-                .put(MAC_OS_X, x86_64, "/redis-server-6.2.6-v5-darwin-amd64")
-                .put(MAC_OS_X, aarch64, "/redis-server-6.2.6-v5-darwin-arm64")
-                .build();
+		final Map<OsArchitecture, String> map = new HashMap<>();
+		map.put(UNIX_x86, "/redis-server-6.2.7-linux-386");
+		map.put(UNIX_x86_64, "/redis-server-6.2.6-v5-linux-amd64");
+		map.put(UNIX_AARCH64, "/redis-server-6.2.7-linux-arm64");
+		map.put(WINDOWS_x86_64, "/redis-server-5.0.14.1-windows-amd64.exe");
+		map.put(MAC_OS_X_x86_64, "/redis-server-6.2.6-v5-darwin-amd64");
+		map.put(MAC_OS_X_ARM64, "/redis-server-6.2.6-v5-darwin-arm64");
 
         redisServer = newRedisServer()
-                .executableProvider(customProvider)
-                .build();
+			.executableProvider(newJarResourceProvider(map))
+			.build();
     }
 
     @Test(expected = FileNotFoundException.class)
     public void shouldFailWhenBadExecutableGiven() throws IOException {
-        ExecutableProvider buggyProvider = new ExecutableProviderBuilder()
-                .put(UNIX, "some")
-                .put(WINDOWS, x86, "some")
-                .put(WINDOWS, x86_64, "some")
-                .put(MAC_OS_X, "some")
-                .build();
+		final Map<OsArchitecture, String> buggyMap = new HashMap<>();
+		buggyMap.put(UNIX_x86, "some");
+		buggyMap.put(UNIX_x86_64, "some");
+		buggyMap.put(UNIX_AARCH64, "some");
+		buggyMap.put(WINDOWS_x86, "some");
+		buggyMap.put(WINDOWS_x86_64, "some");
+		buggyMap.put(MAC_OS_X_x86_64, "some");
+		buggyMap.put(MAC_OS_X_ARM64, "some");
 
         redisServer = newRedisServer()
-                .executableProvider(buggyProvider)
-                .build();
+			.executableProvider(newJarResourceProvider(buggyMap))
+			.build();
     }
 
 	@Test
@@ -138,4 +143,5 @@ public class RedisServerTest {
             } while (!readyPattern.matcher(line).matches());
         }
     }
+
 }

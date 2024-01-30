@@ -10,6 +10,7 @@ import static redis.embedded.model.OS.WINDOWS;
 public class OsArchitecture {
     
     public static final OsArchitecture
+        WINDOWS_x86 = new OsArchitecture(WINDOWS, x86),
         WINDOWS_x86_64 = new OsArchitecture(WINDOWS, x86_64),
         UNIX_x86 = new OsArchitecture(UNIX, x86),
         UNIX_x86_64 = new OsArchitecture(UNIX, x86_64),

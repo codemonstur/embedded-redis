@@ -15,10 +15,13 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public enum IO {;
 
-    public static File writeResourceToExecutableFile(final String resourcePath) throws IOException {
+    public static File newTempDirForBinary() throws IOException {
         final File tempDirectory = createDirectories(createTempDirectory("redis-")).toFile();
         tempDirectory.deleteOnExit();
+        return tempDirectory;
+    }
 
+    public static File writeResourceToExecutableFile(final File tempDirectory, final String resourcePath) throws IOException {
         final File executable = new File(tempDirectory, resourcePath);
         try (final InputStream in = IO.class.getResourceAsStream(resourcePath)) {
             if (in == null) throw new FileNotFoundException("Could not find Redis executable at " + resourcePath);

@@ -11,9 +11,10 @@ import java.util.function.Consumer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static redis.embedded.Redis.DEFAULT_REDIS_PORT;
-import static redis.embedded.core.ExecutableProvider.newEmbeddedRedisProvider;
+import static redis.embedded.core.ExecutableProvider.newJarResourceProvider;
 
 public final class RedisSentinelBuilder {
+
     private static final String
         LINE_SEPARATOR = System.getProperty("line.separator"),
         CONF_FILENAME = "embedded-redis-sentinel",
@@ -24,7 +25,7 @@ public final class RedisSentinelBuilder {
         LINE_PORT = "port %d";
 
     private File executable;
-    private ExecutableProvider executableProvider = newEmbeddedRedisProvider();
+    private ExecutableProvider executableProvider = newJarResourceProvider();
     private String bind = "127.0.0.1";
     private Integer port = 26379;
     private int masterPort = DEFAULT_REDIS_PORT;
@@ -184,4 +185,5 @@ public final class RedisSentinelBuilder {
 
         return args;
     }
+
 }

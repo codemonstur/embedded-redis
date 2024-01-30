@@ -13,7 +13,8 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 public final class RedisShardedCluster implements Redis {
-    public static final String CLUSTER_IP = "127.0.0.1";
+
+    private static final String CLUSTER_IP = "127.0.0.1";
     private static final int MAX_NUMBER_OF_SLOTS_PER_CLUSTER = 16384;
     private static final Duration SLEEP_DURATION = Duration.ofMillis(300);
     private static final long SLEEP_DURATION_IN_MILLIS = SLEEP_DURATION.toMillis();
@@ -26,8 +27,7 @@ public final class RedisShardedCluster implements Redis {
     public RedisShardedCluster(
             final List<Redis> servers,
             final Map<Integer, Set<Integer>> replicasPortsByMainNodePort,
-            final Duration initializationTimeout
-    ) {
+            final Duration initializationTimeout) {
         this.servers.addAll(servers);
         this.replicasPortsByMainNodePort.putAll(replicasPortsByMainNodePort);
         this.initializationTimeout = initializationTimeout;
@@ -98,21 +98,21 @@ public final class RedisShardedCluster implements Redis {
         // for every shard meet the main node (except the 1st shard) and add their slots manually
         final List<Integer> shardsMainNodePorts = new LinkedList<>(replicasPortsByMainNodePort.keySet());
         final int slotsPerShard = MAX_NUMBER_OF_SLOTS_PER_CLUSTER / shardsMainNodePorts.size();
-        for(int i = 0; i < shardsMainNodePorts.size(); i++) {
+        for (int i = 0; i < shardsMainNodePorts.size(); i++) {
             final Integer port = shardsMainNodePorts.get(i);
-            int startSlot = i * slotsPerShard;
-            int endSlot = i == shardsMainNodePorts.size() - 1
+            final int startSlot = i * slotsPerShard;
+            final int endSlot = i == shardsMainNodePorts.size() - 1
                           ? MAX_NUMBER_OF_SLOTS_PER_CLUSTER - 1
                           : startSlot + slotsPerShard - 1;
             try (final Jedis jedis = new Jedis(CLUSTER_IP, port)) {
-                if(!port.equals(clusterMeetTarget)){
+                if (!port.equals(clusterMeetTarget)) {
                     jedis.clusterMeet(CLUSTER_IP, clusterMeetTarget);
                 }
 
                 final String nodeId = jedis.clusterMyId();
                 mainNodeIdsByPort.put(port, nodeId);
                 jedis.clusterAddSlots(IntStream.range(startSlot, endSlot + 1).toArray());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new RedisClusterSetupException("Failed creating main node instance at port: " + port, e);
             }
         }

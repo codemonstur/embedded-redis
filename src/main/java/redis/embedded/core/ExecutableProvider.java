@@ -1,6 +1,8 @@
 package redis.embedded.core;
 
 import redis.embedded.model.OsArchitecture;
+import redis.embedded.util.IO;
+import redis.embedded.util.IOSupplier;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -14,8 +16,7 @@ import static java.nio.file.Files.*;
 import static java.nio.file.StandardOpenOption.*;
 import static java.nio.file.attribute.PosixFilePermissions.fromString;
 import static redis.embedded.model.OsArchitecture.*;
-import static redis.embedded.util.IO.findBinaryInPath;
-import static redis.embedded.util.IO.writeResourceToExecutableFile;
+import static redis.embedded.util.IO.*;
 
 public interface ExecutableProvider {
 
@@ -26,16 +27,31 @@ public interface ExecutableProvider {
 
     File get() throws IOException;
 
-    static ExecutableProvider newEmbeddedRedisProvider() {
-        final Map<OsArchitecture, String> executables = newProvidedVersionsMap();
-        return () -> writeResourceToExecutableFile(executables.get(detectOSandArchitecture()));
+    static ExecutableProvider newJarResourceProvider() {
+        final Map<OsArchitecture, String> map = newProvidedVersionsMap();
+        return newJarResourceProvider(IO::newTempDirForBinary, map);
+    }
+
+    static ExecutableProvider newJarResourceProvider(final File tempDirectory) {
+        final Map<OsArchitecture, String> map = newProvidedVersionsMap();
+        return newJarResourceProvider(() -> tempDirectory, map);
+    }
+
+    static ExecutableProvider newJarResourceProvider(final Map<OsArchitecture, String> executables) {
+        return newJarResourceProvider(IO::newTempDirForBinary, executables);
+    }
+
+    static ExecutableProvider newJarResourceProvider(final IOSupplier<File> tempDirectory, final Map<OsArchitecture, String> executables) {
+        final OsArchitecture osArch = detectOSandArchitecture();
+        return () -> writeResourceToExecutableFile(tempDirectory.get(), executables.get(osArch));
     }
 
     static ExecutableProvider newFileThenJarResourceProvider(final Map<OsArchitecture, String> executables) {
         return () -> {
             final String executablePath = executables.get(detectOSandArchitecture());
             final File executable = new File(executablePath);
-            return executable.isFile() ? executable : writeResourceToExecutableFile(executablePath);
+            final File tempDir = newTempDirForBinary();
+            return executable.isFile() ? executable : writeResourceToExecutableFile(tempDir, executablePath);
         };
     }
 
@@ -51,10 +67,6 @@ public interface ExecutableProvider {
     }
     static ExecutableProvider newSystemPropertyProvider(final String propertyName) {
         return () -> new File(System.getProperty(propertyName));
-    }
-
-    static ExecutableProvider newJarResourceProvider(final Map<OsArchitecture, String> executables) {
-        return () -> writeResourceToExecutableFile(executables.get(detectOSandArchitecture()));
     }
 
     static ExecutableProvider newExecutableInPath(final String executableName) throws FileNotFoundException {

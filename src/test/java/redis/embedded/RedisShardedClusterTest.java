@@ -9,7 +9,6 @@ import redis.clients.jedis.JedisCluster;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
-import static redis.embedded.RedisShardedCluster.CLUSTER_IP;
 import static redis.embedded.RedisShardedCluster.newRedisCluster;
 
 public class RedisShardedClusterTest {
@@ -27,7 +26,7 @@ public class RedisShardedClusterTest {
 
     @Test
     public void testSimpleOperationsAfterClusterStart() {
-        try (final JedisCluster jc = new JedisCluster(new HostAndPort(CLUSTER_IP, cluster.getPort()))) {
+        try (final JedisCluster jc = new JedisCluster(new HostAndPort("127.0.0.1", cluster.getPort()))) {
             jc.set("somekey", "somevalue");
             assertEquals("the value should be equal", "somevalue", jc.get("somekey"));
         }
@@ -42,7 +41,7 @@ public class RedisShardedClusterTest {
 			 .shard("master3", 1)
 			 .build();
 		cluster.start();
-		try (final JedisCluster jc = new JedisCluster(new HostAndPort(CLUSTER_IP, cluster.getPort()))) {
+		try (final JedisCluster jc = new JedisCluster(new HostAndPort("127.0.0.1", cluster.getPort()))) {
 			jc.set("somekey", "somevalue");
 			assertEquals("the value should be equal", "somevalue", jc.get("somekey"));
 		}

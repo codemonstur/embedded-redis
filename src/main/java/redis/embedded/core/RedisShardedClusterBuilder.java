@@ -12,6 +12,7 @@ import java.util.*;
 import static redis.embedded.core.PortProvider.*;
 
 public final class RedisShardedClusterBuilder {
+
     private static final Duration DEFAULT_INITIALIZATION_TIMEOUT = Duration.ofSeconds(20);
 
     private RedisServerBuilder serverBuilder = new RedisServerBuilder();
@@ -89,4 +90,5 @@ public final class RedisShardedClusterBuilder {
         serverBuilder.setting("appendonly no");
         return serverBuilder.port(shard.mainNodePort).build();
     }
+
 }

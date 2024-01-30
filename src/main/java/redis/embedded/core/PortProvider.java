@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public interface PortProvider {
-    //Redis uses a cluster bus port as the first node port + 10000, so we need to make sure we use ports lower than
+    // Redis uses a cluster bus port as the first node port + 10000, so we need to make sure we use ports lower than
     // 55535 to ensure we always get a valid cluster bus port. We chose 50000 in order to have a safe margin.
     // Theoretically we could use the "cluster-port" as documented here:
     // https://redis.io/docs/reference/cluster-spec/#the-cluster-bus
@@ -21,7 +21,7 @@ public interface PortProvider {
             try (final ServerSocket socket = new ServerSocket(0)) {
                 socket.setReuseAddress(false);
                 return socket.getLocalPort();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new IllegalArgumentException("Could not provide ephemeral port", e);
             }
         };
@@ -53,4 +53,5 @@ public interface PortProvider {
         final AtomicInteger currentPort = new AtomicInteger(start);
         return currentPort::getAndIncrement;
     }
+
 }

@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public final class ReplicationGroup {
+
     public final String masterName;
     public final int masterPort;
     public final List<Integer> slavePorts = new LinkedList<>();
@@ -17,4 +18,5 @@ public final class ReplicationGroup {
             this.slavePorts.add(provider.get());
         }
     }
+
 }
