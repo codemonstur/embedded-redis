@@ -36,6 +36,10 @@ public interface ExecutableProvider {
         final Map<OsArchitecture, String> map = newProvidedVersionsMap();
         return newJarResourceProvider(() -> tempDirectory, map);
     }
+    static ExecutableProvider newJarResourceProvider(final IOSupplier<File> tempDirectorySupplier) {
+        final Map<OsArchitecture, String> map = newProvidedVersionsMap();
+        return newJarResourceProvider(tempDirectorySupplier, map);
+    }
 
     static ExecutableProvider newJarResourceProvider(final Map<OsArchitecture, String> executables) {
         return newJarResourceProvider(IO::newTempDirForBinary, executables);
