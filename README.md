@@ -18,7 +18,7 @@ Maven Central:
 <dependency>
   <groupId>com.github.codemonstur</groupId>
   <artifactId>embedded-redis</artifactId>
-  <version>1.2.0</version>
+  <version>1.4.0</version>
 </dependency>
 ```
 
