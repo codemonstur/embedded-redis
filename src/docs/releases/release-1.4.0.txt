@@ -1,0 +1,3 @@
+1.4.0
+
+Added ability to set the temp dir in which binaries will be written by JarResourceProvider
