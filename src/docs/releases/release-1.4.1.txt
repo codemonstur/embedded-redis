@@ -1,0 +1,3 @@
+1.4.1
+
+Added two binaries for use with the CachedURLProvider
