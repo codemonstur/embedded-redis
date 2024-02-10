@@ -23,7 +23,12 @@ public interface ExecutableProvider {
     String ENVIRONMENT_EXECUTABLE_LOCATION = "EMBEDDED_REDIS_EXECUTABLE";
     String PROPERTY_EXECUTABLE_LOCATION = "embedded.redis.executable";
 
-    URI REDIS_7_2_MACOSX_14_SONOMA_HANKCP = URI.create("https://github.com/codemonstur/embedded-redis/raw/master/src/main/binaries/redis-server-7.2-darwin-arm64");
+    URI
+        REDIS_7_2_MACOSX_14_SONOMA_HANKCP = URI.create("https://github.com/codemonstur/embedded-redis/raw/master/src/main/binaries/redis-server-7.2-darwin-arm64"),
+        // Downloaded from: https://packages.redis.io/redis-stack/redis-stack-server-7.2.0-v6.jammy.x86_64.tar.gz
+        REDIS_7_2_LINUX_JAMMY_X86_64 = URI.create("https://github.com/codemonstur/embedded-redis/raw/master/src/main/binaries/redis-stack-server-7.2.0-v6.jammy.x86_64"),
+        // Downloaded from: https://packages.redis.io/redis-stack/redis-stack-server-7.2.0-v6.jammy.arm64.tar.gz
+        REDIS_7_2_LINUX_JAMMY_ARM_64 = URI.create("https://github.com/codemonstur/embedded-redis/raw/master/src/main/binaries/redis-stack-server-7.2.0-v6.jammy.arm64");
 
     File get() throws IOException;
 
