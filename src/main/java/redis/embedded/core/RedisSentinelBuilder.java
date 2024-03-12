@@ -25,6 +25,7 @@ public final class RedisSentinelBuilder {
         LINE_PORT = "port %d";
 
     private File executable;
+
     private ExecutableProvider executableProvider = newJarResourceProvider();
     private String bind = "127.0.0.1";
     private Integer port = 26379;
@@ -100,13 +101,8 @@ public final class RedisSentinelBuilder {
     }
 
     public RedisSentinelBuilder setting(final String configLine) {
-        if (sentinelConf != null) {
-            throw new IllegalArgumentException("Redis configuration is already set using redis conf file");
-        }
-
-        if (redisConfigBuilder == null) {
-            redisConfigBuilder = new StringBuilder();
-        }
+        if (sentinelConf != null) throw new IllegalArgumentException("Redis configuration is already set using redis conf file");
+        if (redisConfigBuilder == null) redisConfigBuilder = new StringBuilder();
 
         redisConfigBuilder.append(configLine).append(LINE_SEPARATOR);
         return this;

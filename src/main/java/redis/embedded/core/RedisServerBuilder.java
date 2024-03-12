@@ -21,7 +21,6 @@ public final class RedisServerBuilder {
 
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
-    private File executable;
     private ExecutableProvider provider = newJarResourceProvider();
     private String bindAddress = "127.0.0.1";
     private int bindPort = DEFAULT_REDIS_PORT;
@@ -94,14 +93,7 @@ public final class RedisServerBuilder {
     }
 
     public void reset() {
-        this.executable = null;
         this.slaveOf = null;
-        this.redisConfigBuilder = new StringBuilder();
-        this.provider = newJarResourceProvider();
-        this.bindAddress = "127.0.0.1";
-        this.bindPort = DEFAULT_REDIS_PORT;
-        this.soutListener = null;
-        this.serrListener = null;
     }
 
     public List<String> buildCommandArgs() throws IOException {
@@ -110,10 +102,8 @@ public final class RedisServerBuilder {
         final Path redisConfigFile =
             writeNewRedisConfigFile("embedded-redis-server_" + bindPort, redisConfigBuilder.toString());
 
-        executable = provider.get();
-
         final List<String> args = new ArrayList<>();
-        args.add(executable.getAbsolutePath());
+        args.add(provider.get().getAbsolutePath());
         args.add(redisConfigFile.toAbsolutePath().toString());
         args.add("--port");
         args.add(Integer.toString(bindPort));
