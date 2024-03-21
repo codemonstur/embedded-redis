@@ -42,9 +42,10 @@ public abstract class RedisInstance implements Redis {
             addShutdownHook("RedisInstanceCleaner", checkedToRuntime(this::stop));
             if (serrListener != null)
                 newDaemonThread(() -> logStream(process.getErrorStream(), serrListener)).start();
-            awaitServerReady(process, readyPattern, soutListener);
             if (soutListener != null)
                 newDaemonThread(() -> logStream(process.getInputStream(), soutListener)).start();
+
+            awaitServerReady(process, readyPattern, soutListener);
 
             active = true;
         } catch (final IOException e) {
