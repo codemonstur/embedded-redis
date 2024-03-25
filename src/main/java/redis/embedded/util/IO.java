@@ -74,6 +74,17 @@ public enum IO {;
         return false;
     }
 
+    public static String readFully(final InputStream in, final Consumer<String> listener) {
+        final StringBuilder ret = new StringBuilder();
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+            String line; while ((line = reader.readLine()) != null) {
+                if (listener != null) listener.accept(line);
+                ret.append(line);
+            }
+        } catch (final IOException ignored) {}
+        return ret.toString();
+    }
+
     public static Stream<String> processToLines(final String command) throws IOException {
         final Process proc = Runtime.getRuntime().exec(command);
         return new BufferedReader(new InputStreamReader(proc.getInputStream())).lines();
