@@ -87,7 +87,7 @@ looks like this:
 
 One option for resolving the issue is to install openssl using `brew install openssl@3`. Alternatively, you
 can use a binary that doesn't have TLS support. Either by compiling your own from source, or by using HankCP's
-binary at ExecutableProvider.REDIS_7_2_MACOSX_14_SONOMA_HANKCP, or downloading one from some other place.
+binary at `ExecutableProvider.REDIS_7_2_MACOSX_14_SONOMA_HANKCP`, or downloading one from some other place.
 
 On linux the error will look like this:
 
@@ -96,7 +96,7 @@ On linux the error will look like this:
 
 The problem is the same as on MacOS. You need a binary that doesn't require the libssl library or you need to
 provide that library. If you are running the app on your host you can install the needed package using your 
-package manager. Such as with apt-get (sudo apt-get install openssl). If you are running this 
+package manager. Such as with apt-get (`sudo apt-get install openssl`). If you are running this 
 inside a docker image you'll need to make sure the library is available inside the image.
 
 ## Setting up a cluster
