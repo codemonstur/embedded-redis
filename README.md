@@ -71,10 +71,10 @@ Not all operating systems and architectures are supported.
 If you find that the default binaries do not work your best approach is to compile your own and configure an `ExecutableProvider`.
 
 Additional binaries that are not part of the default set are located in `src/main/binaries` in this project.
-You can use the `ExecutableProvider.newCachedUrlProvider()` to make use of them. (currently only 1 binary)
+You can use the `ExecutableProvider.newCachedUrlProvider()` to make use of them. (currently only 3 binaries)
 Example code how to do this can be found at [src/test/java/tools/DownloadUriTest.java](src/test/java/tools/DownloadUriTest.java).
 
-## SSL/TLS Troublehooting
+## SSL/TLS Troubleshooting
 
 You might get an error when you try to start the default binary without having openssl installed. The default
 binaries have TLS support but require a library on the host OS. On MacOS you will probably get an error that
@@ -96,7 +96,7 @@ On linux the error will look like this:
 
 The problem is the same as on MacOS. You need a binary that doesn't require the libssl library or you need to
 provide that library. If you are running the app on your host you can install the needed package using your 
-package manager. Such as with apt-get (sudo apt-get install libssl1.0.0 libssl-dev). If you are running this 
+package manager. Such as with apt-get (sudo apt-get install openssl). If you are running this 
 inside a docker image you'll need to make sure the library is available inside the image.
 
 ## Setting up a cluster
