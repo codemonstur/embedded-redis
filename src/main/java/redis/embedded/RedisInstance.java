@@ -54,6 +54,29 @@ public abstract class RedisInstance implements Redis {
         }
     }
 
+    // You might get an error when you try to start the default binary without having openssl installed. The default
+    // binaries have TLS support but require a library on the host OS. On MacOS you will probably get an error that
+    // looks like this:
+    //
+    //     '/opt/homebrew/opt/openssl@3/lib/libssl.3.dylib' (no such file),
+    //     '/System/Volumes/Preboot/Cryptexes/OS/opt/homebrew/opt/openssl@3/lib/libssl.3.dylib' (no such file),
+    //     '/opt/homebrew/opt/openssl@3/lib/libssl.3.dylib' (no such file),
+    //     '/usr/lib/libssl.3.dylib' (no such file, not in dyld cache)
+    //
+    // One option for resolving the issue is to install openssl using `brew install openssl@3`. Alternatively, you
+    // can use a binary that doesn't have TLS support. Either by compiling your own from source, or by using HankCP's
+    // binary at ExecutableProvider.REDIS_7_2_MACOSX_14_SONOMA_HANKCP, or downloading one from some other place.
+    //
+    // On linux the error will look like this:
+    //
+    //     /app/redis-server-6.2.6-v5-linux-amd64: error while loading shared libraries: libssl.so.3: cannot open
+    //     shared object file: No such file or directory
+    //
+    // The problem is the same as on MacOS. You need a binary that doesn't require the libssl library or you need to
+    // provide that library. If you are running the app on your host you can install the needed package using your
+    // package manager. Such as with apt-get (sudo apt-get install libssl1.0.0 libssl-dev). If you are running this
+    // inside a docker image you'll need to make sure the library is available inside the image.
+
     private static void awaitServerReady(final Process process, final Pattern readyPattern
             , final Consumer<String> soutListener, final Consumer<String> serrListener) throws IOException {
         final StringBuilder log = new StringBuilder();
