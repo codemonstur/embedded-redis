@@ -1,5 +1,8 @@
 package redis.embedded.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,6 +17,8 @@ import static java.nio.file.Files.createTempDirectory;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public enum IO {;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(IO.class);
 
     public static File newTempDirForBinary() throws IOException {
         final File tempDirectory = createDirectories(createTempDirectory("redis-")).toFile();
@@ -105,4 +110,11 @@ public enum IO {;
         return location.get();
     }
 
+    public static void deleteSafely(final Path path) {
+        try {
+            Files.deleteIfExists(path);
+        } catch (final IOException e) {
+            LOGGER.warn("Failed to delete path " + path, e);
+        }
+    }
 }

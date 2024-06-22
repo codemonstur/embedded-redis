@@ -1,5 +1,7 @@
 package redis.embedded;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
@@ -13,6 +15,8 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 public final class RedisShardedCluster implements Redis {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisShardedCluster.class);
 
     private static final String CLUSTER_IP = "127.0.0.1";
     private static final int MAX_NUMBER_OF_SLOTS_PER_CLUSTER = 16384;
@@ -56,8 +60,22 @@ public final class RedisShardedCluster implements Redis {
 
     @Override
     public void stop() throws IOException {
-       for (final Redis redis : servers) {
+        final List<Exception> exceptions = new ArrayList<>();
+        for (final Redis redis : servers) {
+            stopSafely(redis).ifPresent(exceptions::add);
+        }
+        if (!exceptions.isEmpty()) {
+            throw new IOException("Failed to stop Redis cluster", exceptions.get(0));
+        }
+    }
+
+    private Optional<Exception> stopSafely(final Redis redis) {
+        try {
             redis.stop();
+            return Optional.empty();
+        } catch (final IOException | RuntimeException e) {
+            LOGGER.error("Failed to stop Redis instance", e);
+            return Optional.of(e);
         }
     }
 
