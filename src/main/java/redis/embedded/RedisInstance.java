@@ -1,8 +1,10 @@
 package redis.embedded;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.AccessDeniedException;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -35,10 +37,16 @@ public abstract class RedisInstance implements Redis {
 
     public synchronized void start() throws IOException {
         if (active) return;
+        final File executable = new File(args.get(0));
+
+        if (!executable.isFile())
+            throw new FileNotFoundException("Redis binary " + args.get(0) + " could not be found");
+        if (!executable.canExecute())
+            throw new AccessDeniedException("Redis binary " + args.get(0) + " is not executable");
 
         try {
             process = new ProcessBuilder(args)
-                .directory(new File(args.get(0)).getParentFile())
+                .directory(executable.getParentFile())
                 .start();
             addShutdownHook("RedisInstanceCleaner", checkedToRuntime(this::stop));
             awaitServerReady(process, readyPattern, soutListener, serrListener);
