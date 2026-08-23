@@ -43,13 +43,13 @@ release-notes:
 	@git log --pretty="%s" $(PREVIOUS_TAG)... master >> src/docs/releases/release-$(VERSION).txt
 
 deploy: build
-	@test -f "src/docs/releases/release-$(VERSION).txt $(NAME)-$(VERSION)" || { echo "Release notes are missing"; exit 1; }
+	@test -f "src/docs/releases/release-$(VERSION).txt" || { echo "Release notes are missing"; exit 1; }
 	@echo "[$(NAME)] Uploading to maven central"
 	@mvn clean deploy -DskipTests -P release
 	@echo "[$(NAME)] Creating github release"
-	@hub release create -a target/$(NAME)-$(VERSION).jar -a target/$(NAME)-$(VERSION)-javadoc.jar -a target/$(NAME)-$(VERSION)-sources.jar -F src/docs/releases/release-$(VERSION).txt $(NAME)-$(VERSION)
+	@echo hub release create -a target/$(NAME)-$(VERSION).jar -a target/$(NAME)-$(VERSION)-javadoc.jar -a target/$(NAME)-$(VERSION)-sources.jar -F src/docs/releases/release-$(VERSION).txt $(NAME)-$(VERSION)
 	@echo "[$(NAME)] Tagging and pushing to github"
-#	@git tag $(NAME)-$(VERSION)
+	@git tag $(NAME)-$(VERSION)
 	@git push && git push --tags
 
 build-arm:
