@@ -26,6 +26,8 @@ public interface ExecutableProvider {
     URI
         // Downloaded from https://github.com/zkteco-home/redis-windows/raw/master/redis-server.exe
         REDIS_7_2_5_WINDOWS_ZKTECO = URI.create("https://github.com/codemonstur/embedded-redis/raw/master/src/main/binaries/redis-server-7.2.5-windows"),
+        REDIS_8_8_0_WINDOWS_ZKTECO = URI.create("https://github.com/zkteco-home/redis-windows/raw/refs/tags/8.8.0/redis-server.exe"),
+        REDIS_8_10_1_WINDOWS_ZKTECO = URI.create("https://github.com/zkteco-home/redis-windows/raw/refs/tags/8.10.1/redis-server.exe"),
         REDIS_7_2_MACOSX_14_SONOMA_HANKCP = URI.create("https://github.com/codemonstur/embedded-redis/raw/master/src/main/binaries/redis-server-7.2-darwin-arm64"),
         // Downloaded from: https://packages.redis.io/redis-stack/redis-stack-server-7.2.0-v6.jammy.x86_64.tar.gz
         REDIS_7_2_LINUX_JAMMY_X86_64 = URI.create("https://github.com/codemonstur/embedded-redis/raw/master/src/main/binaries/redis-stack-server-7.2.0-v6.jammy.x86_64"),

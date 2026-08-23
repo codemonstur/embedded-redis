@@ -43,6 +43,7 @@ release-notes:
 	@git log --pretty="%s" $(PREVIOUS_TAG)... master >> src/docs/releases/release-$(VERSION).txt
 
 deploy: build
+	@test -f "src/docs/releases/release-$(VERSION).txt $(NAME)-$(VERSION)" || { echo "Release notes are missing"; exit 1; }
 	@echo "[$(NAME)] Uploading to maven central"
 	@mvn clean deploy -DskipTests -P release
 	@echo "[$(NAME)] Creating github release"

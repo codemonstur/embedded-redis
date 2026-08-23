@@ -1,0 +1,5 @@
+1.4.4
+
+Added a windows binary
+Added documentation for SSL/TLS troubleshooting
+Added URLs to 8.8.0 and 8.10.1 windows binaries

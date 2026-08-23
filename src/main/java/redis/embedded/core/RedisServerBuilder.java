@@ -1,9 +1,7 @@
 package redis.embedded.core;
 
-import redis.embedded.RedisCluster;
 import redis.embedded.RedisServer;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
