@@ -1,5 +1,5 @@
 
-.PHONY: help clean build test validate release-notes deploy build-arm
+.PHONY: help clean build test validate release-notes deploy build-arm coverage
 
 NAME=`xmllint --xpath "//project/artifactId/text()" pom.xml`
 VERSION=`xmllint --xpath "//project/version/text()" pom.xml`
@@ -20,6 +20,7 @@ help:
 	@echo "\tclean\t\t\tDelete everything in ./target"
 	@echo "\tbuild\t\t\tCleans the project and rebuilds the code"
 	@echo "\ttest\t\t\tRuns the tests"
+	@echo "\tcoverage\t\t\tRun tests and generate a jacoco coverage report"
 	@echo "\tvalidate\t\tCheck dependency versions, cves, and licenses"
 	@echo "\trelease-notes\t\tCreate release notes for the latest version"
 	@echo "\tdeploy\t\t\tClean, build and deploy a version to Github"
@@ -37,6 +38,15 @@ build:
 
 test:
 	@mvn test
+
+# Runs the tests and writes a coverage report to target/site/jacoco
+# Noisy plugin banner lines are silenced through .mvn/maven.config
+coverage:
+	@$(INFO) "Running tests and generating coverage report"
+	@mvn -Dstyle.color=always org.jacoco:jacoco-maven-plugin:0.8.15:prepare-agent test org.jacoco:jacoco-maven-plugin:0.8.15:report
+	@$(INFO) "Coverage report written to target/site/jacoco/index.html"
+	@output=$$(java src/build/CoverageSummary.java target/site/jacoco/jacoco.csv) || exit $$?; \
+	printf '%s\n' "$$output" | while IFS= read -r line; do $(INFO) "$$line"; done
 
 validate:
 	@mvn versions:display-dependency-updates
