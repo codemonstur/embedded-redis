@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import redis.embedded.util.JedisUtil;
 
 import java.io.IOException;
 
@@ -17,14 +18,17 @@ public class SpringDataConnectivityTest {
     private RedisTemplate<String, String> template;
     private JedisConnectionFactory connectionFactory;
 
+    private int port;
+
     @Before
     public void setUp() throws IOException {
-        redisServer = new RedisServer(6381);
+        port = JedisUtil.newFreePort();
+        redisServer = new RedisServer(port);
         redisServer.start();
 
         connectionFactory = new JedisConnectionFactory();
         connectionFactory.getStandaloneConfiguration().setHostName("localhost");
-        connectionFactory.getStandaloneConfiguration().setPort(6381);
+        connectionFactory.getStandaloneConfiguration().setPort(port);
         connectionFactory.afterPropertiesSet();
 
         template = new StringRedisTemplate();
@@ -42,8 +46,14 @@ public class SpringDataConnectivityTest {
     }
 
     @After
-    public void tearDown() throws IOException {
-        redisServer.stop();
+    public void tearDown() throws Exception {
+        // Releases the pooled connections first, otherwise they can still hold the port when the server stops
+        if (connectionFactory != null) {
+            connectionFactory.destroy();
+        }
+        if (redisServer != null) {
+            redisServer.stop();
+        }
     }
 
 }

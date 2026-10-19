@@ -10,6 +10,14 @@ Redis embedded server for Java integration testing.
 Forked from [ozimov](https://github.com/ozimov/embedded-redis),
 which was forked from [kstyrc](https://github.com/kstyrc/embedded-redis)
 
+Documentation
+==============
+
+Extended documentation lives in [src/docs](src/docs/README.md):
+[getting started](src/docs/getting-started.md), [configuration](src/docs/configuration.md),
+[executables and binaries](src/docs/executables.md), [clusters](src/docs/clusters.md),
+[troubleshooting](src/docs/troubleshooting.md) and [architecture](src/docs/architecture.md).
+
 Maven dependency
 ==============
 
@@ -18,7 +26,7 @@ Maven Central:
 <dependency>
   <groupId>com.github.codemonstur</groupId>
   <artifactId>embedded-redis</artifactId>
-  <version>1.4.3</version>
+  <version>1.4.4</version>
 </dependency>
 ```
 
@@ -43,7 +51,7 @@ You can also use fluent API to create RedisServer:
 RedisServer redisServer = RedisServer.newRedisServer()
   .executableProvider(customRedisProvider)
   .port(6379)
-  .slaveOf("locahost", 6378)
+  .slaveOf("localhost", 6378)
   .configFile("/path/to/your/redis.conf")
   .build();
 ```
@@ -54,7 +62,7 @@ RedisServer redisServer = RedisServer.newRedisServer()
   .executableProvider(customRedisProvider)
   .port(6379)
   .setting("bind 127.0.0.1") // good for local development on Windows to prevent security popups
-  .slaveOf("locahost", 6378)
+  .slaveOf("localhost", 6378)
   .setting("daemonize no")
   .setting("appendonly no")
   .setting("maxmemory 128M")
@@ -71,7 +79,7 @@ Not all operating systems and architectures are supported.
 If you find that the default binaries do not work your best approach is to compile your own and configure an `ExecutableProvider`.
 
 Additional binaries that are not part of the default set are located in `src/main/binaries` in this project.
-You can use the `ExecutableProvider.newCachedUrlProvider()` to make use of them. (currently only 3 binaries)
+You can use `ExecutableProvider.newCachedUrlProvider(Path, URI)` to make use of them. (currently 4 binaries)
 Example code how to do this can be found at [src/test/java/tools/DownloadUriTest.java](src/test/java/tools/DownloadUriTest.java).
 
 ## SSL/TLS Troubleshooting
@@ -98,6 +106,16 @@ The problem is the same as on MacOS. You need a binary that doesn't require the 
 provide that library. If you are running the app on your host you can install the needed package using your 
 package manager. Such as with apt-get (`sudo apt-get install openssl`). If you are running this 
 inside a docker image you'll need to make sure the library is available inside the image.
+
+## Startup and shutdown timeouts
+
+`start()` blocks until the redis process prints its ready-line, and `stop()` waits for the process to exit.
+A binary that never signals readiness (missing libraries, wrong architecture, ...) or a process that wedges
+during shutdown would otherwise hang the calling thread forever, so both waits are bounded. The bounds can
+be tuned with system properties:
+
+    -Dembedded-redis.readyTimeoutSeconds=60    how long start() waits for the ready-line (default 60)
+    -Dembedded-redis.stopTimeoutSeconds=15     how long stop() waits before the process is killed forcibly (default 15)
 
 ## Setting up a cluster
 
@@ -145,7 +163,7 @@ public class SomeIntegrationTestThatRequiresRedis {
 }
 ```
 
-For an example of setting up a sharded redis cluster check out the code in `RedisShardedServerClusterTest`.
+For an example of setting up a sharded redis cluster check out the code in `RedisShardedClusterTest`.
 
 #### Retrieving ports
 The above example starts Redis cluster with servers on ephemeral ports and sentinels on ports 26400, 26401 and 26402. You can later get ports of servers with ```cluster.serverPorts()```, sentinels with ```cluster.sentinelPorts()``` or all ports with ```cluster.ports()```.
@@ -155,8 +173,8 @@ Redis version
 
 When not provided with the desired redis executable, RedisServer runs os-dependent executable enclosed in jar. Currently it uses:
 - Redis 6.2.7 in case of Linux/Unix x86 or arm64 ([x86 source](https://github.com/signalapp/embedded-redis/blob/2aee2439c3314dba5d03a09dda1897d891f774b3/src/main/resources/redis-server-6.2.7-linux-386), [arm64 source](https://github.com/signalapp/embedded-redis/blob/2aee2439c3314dba5d03a09dda1897d891f774b3/src/main/resources/redis-server-6.2.7-linux-arm64))
-- Redis 6.2.6-v5 in case of Linux/Unix x64 ([source](https://packages.redis.io/redis-stack/redis-stack-server-6.2.6-v5.jammy.x86_64.tar.gz))
-- Redis 6.2.6-v5 in case of OSX x64 or arm64 ([x64 source](https://packages.redis.io/redis-stack/redis-stack-server-6.2.6-v5.catalina.x86_64.zip), [arm64 source](https://packages.redis.io/redis-stack/redis-stack-server-6.2.6-v5.monterey.arm64.zip))
+- Redis 6.2.11 in case of Linux/Unix x64, bundled in redis-stack-server 6.2.6-v5 ([source](https://packages.redis.io/redis-stack/redis-stack-server-6.2.6-v5.jammy.x86_64.tar.gz))
+- Redis 6.2.11 in case of OSX x64 or arm64, bundled in redis-stack-server 6.2.6-v5 ([x64 source](https://packages.redis.io/redis-stack/redis-stack-server-6.2.6-v5.catalina.x86_64.zip), [arm64 source](https://packages.redis.io/redis-stack/redis-stack-server-6.2.6-v5.monterey.arm64.zip))
 - Redis 5.0.14.1 in case of Windows x64 ([source](https://github.com/tporadowski/redis/releases/tag/v5.0.14.1))
 
 However, you should provide RedisServer with redis executable if you need specific version.

@@ -1,45 +1,51 @@
 package redis.embedded;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
+import redis.clients.jedis.exceptions.JedisDataException;
 import redis.embedded.core.RedisSentinelBuilder;
 import redis.embedded.util.JedisUtil;
 
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static redis.embedded.RedisCluster.newRedisCluster;
-import static redis.embedded.RedisSentinel.newRedisSentinel;
-import static redis.embedded.util.Collections.newHashSet;
+import static redis.embedded.util.JedisUtil.awaitMasterDiscovery;
 
 public class RedisClusterTest {
-    private final RedisSentinelBuilder sentinelBuilder = newRedisSentinel();
+    private static final String MASTER_NAME = "ourmaster";
+
+    private final RedisSentinelBuilder sentinelBuilder = RedisSentinel.newRedisSentinel();
     private String bindAddress;
 
-    private Redis sentinel1;
-    private Redis sentinel2;
-    private Redis master1;
-    private Redis master2;
+    private FakeRedis sentinel1;
+    private FakeRedis sentinel2;
+    private FakeRedis master1;
+    private FakeRedis master2;
 
     private RedisCluster instance;
 
     @Before
     public void setUp() throws UnknownHostException {
-        sentinel1 = mock(Redis.class);
-        sentinel2 = mock(Redis.class);
-        master1 = mock(Redis.class);
-        master2 = mock(Redis.class);
+        sentinel1 = new FakeRedis();
+        sentinel2 = new FakeRedis();
+        master1 = new FakeRedis();
+        master2 = new FakeRedis();
 
         // Jedis translates ”localhost” to getLocalHost().getHostAddress() (see Jedis HostAndPort#getLocalHostQuietly),
         // which can vary from 127.0.0.1 (most notably, Debian/Ubuntu return 127.0.1.1)
@@ -49,181 +55,135 @@ public class RedisClusterTest {
         }
     }
 
+    @After
+    public void tearDown() throws IOException {
+        // stop() is a no-op on nodes that never started, so a partially started cluster is fully cleaned up
+        if (instance != null) {
+            instance.stop();
+        }
+    }
+
     @Test
     public void stopShouldStopEntireCluster() throws IOException {
-        final List<Redis> sentinels = Arrays.asList(sentinel1, sentinel2);
-        final List<Redis> servers = Arrays.asList(master1, master2);
-        instance = new RedisCluster(sentinels, servers);
+        instance = new RedisCluster(Arrays.<Redis>asList(sentinel1, sentinel2), Arrays.<Redis>asList(master1, master2));
 
         instance.stop();
 
-        for (final Redis s : sentinels) {
-            verify(s).stop();
-        }
-        for (final Redis s : servers) {
-            verify(s).stop();
-        }
+        assertTrue("sentinel1 should have been stopped", sentinel1.stopped());
+        assertTrue("sentinel2 should have been stopped", sentinel2.stopped());
+        assertTrue("master1 should have been stopped", master1.stopped());
+        assertTrue("master2 should have been stopped", master2.stopped());
     }
 
     @Test
     public void startShouldStartEntireCluster() throws IOException {
-        final List<Redis> sentinels = Arrays.asList(sentinel1, sentinel2);
-        final List<Redis> servers = Arrays.asList(master1, master2);
-        instance = new RedisCluster(sentinels, servers);
+        instance = new RedisCluster(Arrays.<Redis>asList(sentinel1, sentinel2), Arrays.<Redis>asList(master1, master2));
 
         instance.start();
 
-        for (final Redis s : sentinels) {
-            verify(s).start();
-        }
-        for (final Redis s : servers) {
-            verify(s).start();
-        }
+        assertTrue("sentinel1 should have been started", sentinel1.started());
+        assertTrue("sentinel2 should have been started", sentinel2.started());
+        assertTrue("master1 should have been started", master1.started());
+        assertTrue("master2 should have been started", master2.started());
     }
 
     @Test
-    public void isActiveShouldCheckEntireClusterIfAllActive() {
-        given(sentinel1.isActive()).willReturn(true);
-        given(sentinel2.isActive()).willReturn(true);
-        given(master1.isActive()).willReturn(true);
-        given(master2.isActive()).willReturn(true);
-        final List<Redis> sentinels = Arrays.asList(sentinel1, sentinel2);
-        final List<Redis> servers = Arrays.asList(master1, master2);
-        instance = new RedisCluster(sentinels, servers);
+    public void isActiveShouldCheckEntireClusterIfAllActive() throws IOException {
+        sentinel1.setActive(true);
+        sentinel2.setActive(true);
+        master1.setActive(true);
+        master2.setActive(true);
+        instance = new RedisCluster(Arrays.asList(sentinel1, sentinel2), Arrays.asList(master1, master2));
 
-        instance.isActive();
+        assertTrue(instance.isActive());
 
-        for (final Redis s : sentinels) {
-            verify(s).isActive();
-        }
-        for (final Redis s : servers) {
-            verify(s).isActive();
-        }
+        master2.setActive(false);
+
+        assertFalse(instance.isActive());
     }
 
     @Test
     public void testSimpleOperationsAfterRunWithSingleMasterNoSlavesCluster() throws IOException {
         final RedisCluster cluster = newRedisCluster()
             .withSentinelBuilder(sentinelBuilder)
+            .ephemeral()
             .sentinelCount(1)
-            .replicationGroup("ourmaster", 0)
+            .replicationGroup(MASTER_NAME, 0)
             .build();
-        cluster.start();
-
-        JedisSentinelPool pool = null;
-        Jedis jedis = null;
-        try {
-            pool = new JedisSentinelPool("ourmaster", newHashSet("localhost:26379"));
-            jedis = testPool(pool);
-        } finally {
-            if (jedis != null) {
-                jedis.close();
-            }
-            if (pool != null) {
-                pool.destroy();
-            }
-            cluster.stop();
-        }
+        testPoolAgainstCluster(cluster);
     }
 
     @Test
     public void testSimpleOperationsAfterRunWithSingleMasterAndOneSlave() throws IOException {
         final RedisCluster cluster = newRedisCluster()
             .withSentinelBuilder(sentinelBuilder)
+            .ephemeral()
             .sentinelCount(1)
-            .replicationGroup("ourmaster", 1)
+            .replicationGroup(MASTER_NAME, 1)
             .build();
-        cluster.start();
-
-        JedisSentinelPool pool = null;
-        Jedis jedis = null;
-        try {
-            pool = new JedisSentinelPool("ourmaster", newHashSet("localhost:26379"));
-            jedis = testPool(pool);
-        } finally {
-            if (jedis != null) {
-                jedis.close();
-            }
-            if (pool != null) {
-                pool.destroy();
-            }
-            cluster.stop();
-        }
+        testPoolAgainstCluster(cluster);
     }
 
     @Test
     public void testSimpleOperationsAfterRunWithSingleMasterMultipleSlaves() throws IOException {
         final RedisCluster cluster = newRedisCluster()
             .withSentinelBuilder(sentinelBuilder)
+            .ephemeral()
             .sentinelCount(1)
-            .replicationGroup("ourmaster", 2)
+            .replicationGroup(MASTER_NAME, 2)
             .build();
-        cluster.start();
-
-        JedisSentinelPool pool = null;
-        Jedis jedis = null;
-        try {
-            pool = new JedisSentinelPool("ourmaster", newHashSet("localhost:26379"));
-            jedis = testPool(pool);
-        } finally {
-            if (jedis != null) {
-                jedis.close();
-            }
-            if (pool != null) {
-                pool.destroy();
-            }
-            cluster.stop();
-        }
+        testPoolAgainstCluster(cluster);
     }
 
     @Test
     public void testSimpleOperationsAfterRunWithTwoSentinelsSingleMasterMultipleSlaves() throws IOException {
         final RedisCluster cluster = newRedisCluster()
             .withSentinelBuilder(sentinelBuilder)
+            .ephemeral()
             .sentinelCount(2)
-            .replicationGroup("ourmaster", 2)
+            .replicationGroup(MASTER_NAME, 2)
             .build();
-        cluster.start();
-
-        JedisSentinelPool pool = null;
-        Jedis jedis = null;
-        try {
-            pool = new JedisSentinelPool("ourmaster", newHashSet("localhost:26379", "localhost:26380"));
-            jedis = testPool(pool);
-        } finally {
-            if (jedis != null) {
-                jedis.close();
-            }
-            if (pool != null) {
-                pool.destroy();
-            }
-            cluster.stop();
-        }
+        testPoolAgainstCluster(cluster);
     }
 
     @Test
     public void testSimpleOperationsAfterRunWithTwoPredefinedSentinelsSingleMasterMultipleSlaves() throws IOException {
-        final List<Integer> sentinelPorts = Arrays.asList(26381, 26382);
+        final List<Integer> sentinelPorts = Arrays.asList(JedisUtil.newFreePort(), JedisUtil.newFreePort());
         final RedisCluster cluster = newRedisCluster()
                 .withSentinelBuilder(sentinelBuilder)
                 .sentinelPorts(sentinelPorts)
-                .replicationGroup("ourmaster", 2)
+                .ephemeralServers()
+                .replicationGroup(MASTER_NAME, 2)
                 .build();
-        cluster.start();
-        final Set<String> sentinelHosts = JedisUtil.portsToJedisHosts(sentinelPorts);
+        testPoolAgainstCluster(cluster);
+    }
 
-        JedisSentinelPool pool = null;
-        Jedis jedis = null;
+    // Regression test: settings passed via withSentinelBuilder used to be silently discarded, because the
+    // cluster builder reset the builder's configuration before building every sentinel
+    @Test
+    public void testCustomSettingsFromSentinelBuilderAreApplied() throws IOException {
+        final String password = "cluster-secret";
+        final RedisCluster cluster = newRedisCluster()
+                .withSentinelBuilder(sentinelBuilder.setting("requirepass " + password))
+                .ephemeral()
+                .sentinelCount(1)
+                .replicationGroup(MASTER_NAME, 0)
+                .build();
+        final int sentinelPort = cluster.sentinelPorts().get(0);
         try {
-            pool = new JedisSentinelPool("ourmaster", sentinelHosts);
-            jedis = testPool(pool);
+            cluster.start();
+            try (final Jedis sentinel = new Jedis(bindAddress, sentinelPort)) {
+                try {
+                    sentinel.ping();
+                    fail("Sentinel should require the configured password");
+                } catch (final JedisDataException e) {
+                    assertTrue("expected a NOAUTH error but got: " + e.getMessage(),
+                            e.getMessage().contains("NOAUTH"));
+                }
+                sentinel.auth(password);
+                assertEquals("PONG", sentinel.ping());
+            }
         } finally {
-            if (jedis != null) {
-                jedis.close();
-            }
-            if (pool != null) {
-                pool.destroy();
-            }
             cluster.stop();
         }
     }
@@ -235,48 +195,14 @@ public class RedisClusterTest {
         final String master3 = "master3";
         final RedisCluster cluster = newRedisCluster()
                 .withSentinelBuilder(sentinelBuilder)
+                .ephemeral()
                 .sentinelCount(3)
                 .quorumSize(2)
                 .replicationGroup(master1, 1)
                 .replicationGroup(master2, 1)
                 .replicationGroup(master3, 1)
                 .build();
-        cluster.start();
-
-        JedisSentinelPool pool1 = null;
-        JedisSentinelPool pool2 = null;
-        JedisSentinelPool pool3 = null;
-        Jedis jedis1 = null;
-        Jedis jedis2 = null;
-        Jedis jedis3 = null;
-        try {
-            pool1 = new JedisSentinelPool(master1, newHashSet("localhost:26379", "localhost:26380", "localhost:26381"));
-            pool2 = new JedisSentinelPool(master2, newHashSet("localhost:26379", "localhost:26380", "localhost:26381"));
-            pool3 = new JedisSentinelPool(master3, newHashSet("localhost:26379", "localhost:26380", "localhost:26381"));
-            jedis1 = testPool(pool1);
-            jedis2 = testPool(pool2);
-            jedis3 = testPool(pool3);
-        } finally {
-            if (jedis1 != null) {
-                jedis1.close();
-            }
-            if (pool1 != null) {
-                pool1.destroy();
-            }
-            if (jedis2 != null) {
-                jedis2.close();
-            }
-            if (pool2 != null) {
-                pool2.destroy();
-            }
-            if (jedis3 != null) {
-                jedis3.close();
-            }
-            if (pool3 != null) {
-                pool3.destroy();
-            }
-            cluster.stop();
-        }
+        testPoolAgainstCluster(cluster, master1, master2, master3);
     }
 
     @Test
@@ -290,54 +216,88 @@ public class RedisClusterTest {
                 .replicationGroup(master2, 1)
                 .replicationGroup(master3, 1)
                 .build();
-        cluster.start();
-        final Set<String> sentinelHosts = JedisUtil.sentinelHosts(cluster);
+        testPoolAgainstCluster(cluster, master1, master2, master3);
+    }
 
-        JedisSentinelPool pool1 = null;
-        JedisSentinelPool pool2 = null;
-        JedisSentinelPool pool3 = null;
-        Jedis jedis1 = null;
-        Jedis jedis2 = null;
-        Jedis jedis3 = null;
+    /**
+     * Starts the cluster, waits until the sentinels have discovered the given masters, and runs simple
+     * operations against a pool for each master. The cluster is always stopped again, even when the
+     * start fails halfway through.
+     */
+    private void testPoolAgainstCluster(final RedisCluster cluster, final String... masterNames) throws IOException {
+        final Set<String> sentinelHosts = JedisUtil.sentinelHosts(cluster);
+        final List<JedisSentinelPool> pools = new ArrayList<>();
+        final List<Jedis> jedses = new ArrayList<>();
         try {
-            pool1 = new JedisSentinelPool(master1, sentinelHosts);
-            pool2 = new JedisSentinelPool(master2, sentinelHosts);
-            pool3 = new JedisSentinelPool(master3, sentinelHosts);
-            jedis1 = testPool(pool1);
-            jedis2 = testPool(pool2);
-            jedis3 = testPool(pool3);
+            cluster.start();
+
+            final String[] masters = masterNames.length == 0 ? new String[] { MASTER_NAME } : masterNames;
+            for (final String master : masters) {
+                awaitMasterDiscovery(master, sentinelHosts);
+
+                final JedisSentinelPool pool = JedisUtil.newSentinelPool(master, sentinelHosts);
+                pools.add(pool);
+                jedses.add(testPool(pool));
+            }
         } finally {
-            if (jedis1 != null) {
-                jedis1.close();
+            for (final Jedis jedis : jedses) {
+                jedis.close();
             }
-            if (pool1 != null) {
-                pool1.destroy();
-            }
-            if (jedis2 != null) {
-                jedis2.close();
-            }
-            if (pool2 != null) {
-                pool2.destroy();
-            }
-            if (jedis3 != null) {
-                jedis3.close();
-            }
-            if (pool3 != null) {
-                pool3.destroy();
+            for (final JedisSentinelPool pool : pools) {
+                pool.destroy();
             }
             cluster.stop();
         }
     }
 
     private Jedis testPool(final JedisSentinelPool pool) {
-        Jedis jedis;
-        jedis = pool.getResource();
+        final Jedis jedis = pool.getResource();
         jedis.mset("abc", "1", "def", "2");
 
         assertEquals("1", jedis.mget("abc").get(0));
         assertEquals("2", jedis.mget("def").get(0));
         assertNull(jedis.mget("xyz").get(0));
         return jedis;
+    }
+
+    /** Minimal in-memory stand-in for a redis process; replaces the Mockito mocks that needed the (fragile) inline mock-maker. */
+    private static final class FakeRedis implements Redis {
+        private final Set<String> calls = new HashSet<>();
+        private volatile boolean active;
+
+        @Override
+        public boolean isActive() {
+            return active;
+        }
+
+        @Override
+        public void start() {
+            calls.add("start");
+            active = true;
+        }
+
+        @Override
+        public void stop() {
+            calls.add("stop");
+            active = false;
+        }
+
+        @Override
+        public List<Integer> ports() {
+            return Collections.emptyList();
+        }
+
+        boolean started() {
+            return calls.contains("start");
+        }
+
+        boolean stopped() {
+            return calls.contains("stop");
+        }
+
+        void setActive(final boolean active) {
+            this.active = active;
+        }
     }
 
 }

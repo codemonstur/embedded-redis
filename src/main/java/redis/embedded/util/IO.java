@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -14,6 +15,14 @@ import static java.nio.file.Files.createTempDirectory;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public enum IO {;
+
+    // Daemon threads used to read process output with a deadline; a binary that never prints its ready-line
+    // would otherwise block the reader forever.
+    private static final ExecutorService STREAM_READERS = Executors.newCachedThreadPool(run -> {
+        final Thread thread = new Thread(run, "embedded-redis-stream-reader");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     public static File newTempDirForBinary() throws IOException {
         final File tempDirectory = createDirectories(createTempDirectory("redis-")).toFile();
@@ -50,7 +59,7 @@ public enum IO {;
     public static void logStream(final InputStream stream, final Consumer<String> logConsumer) {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
             String line; while ((line = reader.readLine()) != null) {
-                logConsumer.accept(line);
+                if (logConsumer != null) logConsumer.accept(line);
             }
         } catch (final IOException ignored) {}
     }
@@ -63,15 +72,47 @@ public enum IO {;
 
     public static boolean findMatchInStream(final InputStream in, final Pattern pattern
             , final Consumer<String> soutListener, final StringBuilder processOutput) throws IOException {
-        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
-            String line; while ((line = reader.readLine()) != null) {
-                if (soutListener != null) soutListener.accept(line);
-                processOutput.append('\n').append(line);
-                if (pattern.matcher(line).matches())
-                    return true;
-            }
+        // Deliberately not closed on a successful match: the caller keeps reading the process output after
+        // the ready-line, and closing the stream here would both silence the listener and fill up the pipe
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        String line; while ((line = reader.readLine()) != null) {
+            if (soutListener != null) soutListener.accept(line);
+            processOutput.append('\n').append(line);
+            if (pattern.matcher(line).matches())
+                return true;
         }
+        closeQuietly(reader);
         return false;
+    }
+
+    /**
+     * Same as {@link #findMatchInStream(InputStream, Pattern, Consumer, StringBuilder)}, but gives up after the
+     * given timeout instead of blocking until the stream ends. Returns false on timeout, and closes the stream
+     * so the reader thread stops blocking on it.
+     */
+    public static boolean findMatchInStream(final InputStream in, final Pattern pattern
+            , final Consumer<String> soutListener, final StringBuilder processOutput, final long timeoutMs)
+            throws IOException {
+        final Future<Boolean> match = STREAM_READERS.submit(
+            () -> findMatchInStream(in, pattern, soutListener, processOutput));
+        try {
+            return match.get(timeoutMs, TimeUnit.MILLISECONDS);
+        } catch (final TimeoutException e) {
+            match.cancel(true);
+            closeQuietly(in);
+            return false;
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Interrupted while waiting for a match on the process output", e);
+        } catch (final ExecutionException e) {
+            throw new IOException("Failed to read the process output", e.getCause());
+        }
+    }
+
+    private static void closeQuietly(final Closeable closeable) {
+        try {
+            closeable.close();
+        } catch (final IOException ignored) {}
     }
 
     public static String readFully(final InputStream in, final Consumer<String> listener) {

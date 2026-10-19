@@ -1,5 +1,6 @@
 package redis.embedded.core;
 
+import redis.embedded.error.OsArchitectureNotFound;
 import redis.embedded.model.OsArchitecture;
 import redis.embedded.util.IO;
 import redis.embedded.util.IOSupplier;
@@ -7,12 +8,14 @@ import redis.embedded.util.IOSupplier;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.nio.file.Files.*;
+import static java.nio.file.StandardCopyOption.*;
 import static java.nio.file.StandardOpenOption.*;
 import static java.nio.file.attribute.PosixFilePermissions.fromString;
 import static redis.embedded.model.OsArchitecture.*;
@@ -22,6 +25,9 @@ public interface ExecutableProvider {
 
     String ENVIRONMENT_EXECUTABLE_LOCATION = "EMBEDDED_REDIS_EXECUTABLE";
     String PROPERTY_EXECUTABLE_LOCATION = "embedded.redis.executable";
+
+    // Socket timeouts for downloads: a stalled connection must not hang the caller forever
+    int DOWNLOAD_TIMEOUT_MILLIS = 60000;
 
     URI
         // Downloaded from https://github.com/zkteco-home/redis-windows/raw/master/redis-server.exe
@@ -56,15 +62,26 @@ public interface ExecutableProvider {
 
     static ExecutableProvider newJarResourceProvider(final IOSupplier<File> tempDirectory, final Map<OsArchitecture, String> executables) {
         final OsArchitecture osArch = detectOSandArchitecture();
-        return () -> writeResourceToExecutableFile(tempDirectory.get(), executables.get(osArch));
+        return () -> {
+            final String executablePath = executables.get(osArch);
+            if (executablePath == null)
+                throw new OsArchitectureNotFound(new FileNotFoundException(
+                    "No Redis executable is provided for " + osArch.os + " " + osArch.arch));
+            return writeResourceToExecutableFile(tempDirectory.get(), executablePath);
+        };
     }
 
     static ExecutableProvider newFileThenJarResourceProvider(final Map<OsArchitecture, String> executables) {
         return () -> {
-            final String executablePath = executables.get(detectOSandArchitecture());
+            final OsArchitecture osArch = detectOSandArchitecture();
+            final String executablePath = executables.get(osArch);
+            if (executablePath == null)
+                throw new OsArchitectureNotFound(new FileNotFoundException(
+                    "No Redis executable is provided for " + osArch.os + " " + osArch.arch));
             final File executable = new File(executablePath);
-            final File tempDir = newTempDirForBinary();
-            return executable.isFile() ? executable : writeResourceToExecutableFile(tempDir, executablePath);
+            return executable.isFile()
+                ? executable
+                : writeResourceToExecutableFile(newTempDirForBinary(), executablePath);
         };
     }
 
@@ -92,12 +109,16 @@ public interface ExecutableProvider {
                 return cachedLocation.toFile();
 
             final HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
+            connection.setConnectTimeout(DOWNLOAD_TIMEOUT_MILLIS);
+            connection.setReadTimeout(DOWNLOAD_TIMEOUT_MILLIS);
+            Path partial = null;
             try {
                 if (connection.getResponseCode() != HTTP_OK)
                     throw new IOException("Failed to download redis binary from " + uri + ", status code is " + connection.getResponseCode());
 
                 createDirectories(cachedLocation.getParent());
-                try (final OutputStream out = newOutputStream(cachedLocation, CREATE, WRITE, TRUNCATE_EXISTING);
+                partial = createTempFile(cachedLocation.getParent(), cachedLocation.getFileName().toString(), ".part");
+                try (final OutputStream out = newOutputStream(partial, CREATE, WRITE, TRUNCATE_EXISTING);
                      final InputStream in = connection.getInputStream()) {
 
                     final byte[] buffer = new byte[8192];
@@ -105,11 +126,22 @@ public interface ExecutableProvider {
                         out.write(buffer, 0, length);
                     }
                 }
-                cachedLocation.toFile().setExecutable(true);
+                partial.toFile().setExecutable(true);
+                // Moved into place only once complete, so an interrupted download never poisons the cache
+                try {
+                    move(partial, cachedLocation, ATOMIC_MOVE);
+                } catch (final AtomicMoveNotSupportedException e) {
+                    move(partial, cachedLocation, REPLACE_EXISTING);
+                }
 
                 return cachedLocation.toFile();
             } finally {
                 connection.disconnect();
+                if (partial != null) {
+                    try {
+                        deleteIfExists(partial);
+                    } catch (final IOException ignored) {}
+                }
             }
         };
     }

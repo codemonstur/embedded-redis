@@ -4,9 +4,8 @@
     <groupId>com.github.codemonstur</groupId>
     <artifactId>embedded-redis</artifactId>
     <version>1.4.4</version>
-    <packaging>jar</packaging>
 
-    <name>embedded-redis</name>
+    <name>${project.groupId}:${project.artifactId}</name>
     <description>Redis embedded server for Java integration testing.
         Project forked from https://github.com/ozimov/embedded-redis
         Which was forked from https://github.com/kstyrc/embedded-redis</description>
@@ -20,26 +19,41 @@
         </license>
     </licenses>
 
-    <scm>
-        <url>https://github.com/codemonstur/embedded-redis</url>
-        <connection>scm:git:https://github.com/codemonstur/embedded-redis.git</connection>
-        <developerConnection>scm:git:https://github.com/codemonstur/embedded-redis.git</developerConnection>
-    </scm>
-
     <developers>
         <developer>
+            <id>codemonstur</id>
             <name>Jurgen Voorneveld</name>
             <email>jegvoorneveld@gmail.com</email>
         </developer>
     </developers>
 
+    <scm>
+        <connection>scm:git:https://github.com/codemonstur/embedded-redis.git</connection>
+        <developerConnection>scm:git:https://github.com/codemonstur/embedded-redis.git</developerConnection>
+        <url>https://github.com/codemonstur/embedded-redis</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <!-- Single source of truth for the bytecode level; source/target are redundant with release -->
         <maven.compiler.release>8</maven.compiler.release>
-        <version.plugin.license-check>1.3.0</version.plugin.license-check>
+
+        <version.library.jedis>3.8.0</version.library.jedis>
+        <version.library.junit>4.13.2</version.library.junit>
+        <version.library.mockito>5.23.0</version.library.mockito>
+        <version.library.slf4j>1.7.36</version.library.slf4j>
+        <version.library.spring-data-redis>2.7.18</version.library.spring-data-redis>
+
         <version.plugin.check-cves>1.1.0</version.plugin.check-cves>
+        <version.plugin.compiler>3.16.0</version.plugin.compiler>
+        <version.plugin.enforcer>3.6.3</version.plugin.enforcer>
+        <version.plugin.gpg>3.2.8</version.plugin.gpg>
+        <version.plugin.jar>3.5.1</version.plugin.jar>
+        <version.plugin.javadoc>3.12.0</version.plugin.javadoc>
+        <version.plugin.license-check>1.3.0</version.plugin.license-check>
+        <version.plugin.publish>0.12.0</version.plugin.publish>
+        <version.plugin.source>3.4.0</version.plugin.source>
     </properties>
 
     <dependencies>
@@ -47,80 +61,149 @@
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <version>3.8.0</version>
+            <version>${version.library.jedis}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-redis</artifactId>
-            <version>2.7.18</version>
+            <version>${version.library.spring-data-redis}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <version>${version.library.junit}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.23.0</version>
+            <version>${version.library.mockito}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Matches the slf4j-api 1.7.x that jedis pulls in; silences the StaticLoggerBinder warning -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>${version.library.slf4j}</version>
             <scope>test</scope>
         </dependency>
 
     </dependencies>
 
-    <prerequisites>
-        <maven>3.8.1</maven>
-    </prerequisites>
+    <build>
+        <plugins>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sonatype Nexus snapshot repository</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>sonatype-nexus-staging</id>
-            <name>Sonatype Nexus release repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${version.plugin.enforcer}</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven-version</id>
+                        <goals><goal>enforce</goal></goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.6.3,)</version>
+                                    <message>This project requires Maven 3.6.3 or newer to build</message>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${version.plugin.compiler}</version>
+                <configuration>
+                    <!-- Current JDKs flag release 8 as obsolete; the options lint warning is silenced for
+                         both the main and the test compilation. When a future JDK drops Java 8 support
+                         altogether, raise maven.compiler.release (the single place to change). -->
+                    <compilerArgs>
+                        <arg>-Xlint:-options</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${version.plugin.jar}</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${version.plugin.source}</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals><goal>jar</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${version.plugin.javadoc}</version>
+                                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <phase>deploy</phase>
+                        <goals><goal>jar</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>${version.plugin.gpg}</version>
+                <configuration>
+                    <passphrase>${gpg.passphrase}</passphrase>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>${version.plugin.publish}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                    <autoPublish>true</autoPublish>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
 
     <profiles>
-        <profile>
-            <id>release</id>
-            <activation>
-                <property>
-                    <name>release</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.2.8</version>
-                        <configuration>
-                            <passphrase>${gpg.passphrase}</passphrase>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <profile>
             <id>licenses</id>
             <activation>
@@ -143,6 +226,7 @@
                                 <rule>url:equal:http://opensource.org/licenses/BSD-3-Clause</rule>
                                 <rule>url:regex:(http|https)://(www.)?opensource.org/licenses/(MIT|mit-license.php)</rule>
                                 <rule>name:equal:The MIT License</rule>
+                                <rule>name:equal:MIT</rule>
                                 <rule>url:equal:https://opensource.org/license/mit</rule>
                                 <rule>name:regex:(The )?Apache(\s|-)(Software )?(License |License, )?(Version |version )?2\.0</rule>
                                 <rule>url:equal:http://www.eclipse.org/legal/epl-v10.html</rule>
@@ -179,47 +263,5 @@
             </build>
         </profile>
     </profiles>
-
-    <build>
-        <plugins>
-
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.7.0</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>sonatype-nexus-staging</serverId>
-                    <nexusUrl>https://ossrh-staging-api.central.sonatype.com/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.4.0</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals><goal>jar</goal></goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.12.0</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals><goal>jar</goal></goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-        </plugins>
-    </build>
 
 </project>

@@ -47,8 +47,23 @@ public final class RedisShardedCluster implements Redis {
 
     @Override
     public void start() throws IOException {
-        for (final Redis redis : servers) {
-            redis.start();
+        if (replicasPortsByMainNodePort.isEmpty())
+            throw new IOException("Cannot start a sharded cluster without any shards");
+
+        final List<Redis> started = new ArrayList<>();
+        try {
+            for (final Redis redis : servers) {
+                redis.start();
+                started.add(redis);
+            }
+        } catch (final IOException | RuntimeException e) {
+            // Don't leave half a cluster running: the started instances would keep their ports bound
+            try {
+                stopAll(started);
+            } catch (final IOException stopFailure) {
+                e.addSuppressed(stopFailure);
+            }
+            throw e;
         }
 
         linkReplicasAndShards();
@@ -56,9 +71,21 @@ public final class RedisShardedCluster implements Redis {
 
     @Override
     public void stop() throws IOException {
-       for (final Redis redis : servers) {
-            redis.stop();
+        stopAll(servers);
+    }
+
+    // Stops every instance even if one of them fails, so a single wedged process doesn't leak the others
+    private static void stopAll(final List<Redis> instances) throws IOException {
+        IOException failure = null;
+        for (final Redis redis : instances) {
+            try {
+                redis.stop();
+            } catch (final IOException e) {
+                if (failure == null) failure = e;
+                else failure.addSuppressed(e);
+            }
         }
+        if (failure != null) throw failure;
     }
 
     @Override
@@ -87,8 +114,8 @@ public final class RedisShardedCluster implements Redis {
         } catch (final RedisClusterSetupException e) {
             try {
                 this.stop();
-            } catch (final IOException ex) {
-                throw new RuntimeException(ex);
+            } catch (final IOException stopFailure) {
+                e.addSuppressed(stopFailure);
             }
             throw new RuntimeException(e);
         }
@@ -96,6 +123,7 @@ public final class RedisShardedCluster implements Redis {
 
     private void meetMainNodes(final Integer clusterMeetTarget) throws RedisClusterSetupException {
         // for every shard meet the main node (except the 1st shard) and add their slots manually
+        mainNodeIdsByPort.clear();
         final List<Integer> shardsMainNodePorts = new LinkedList<>(replicasPortsByMainNodePort.keySet());
         final int slotsPerShard = MAX_NUMBER_OF_SLOTS_PER_CLUSTER / shardsMainNodePorts.size();
         for (int i = 0; i < shardsMainNodePorts.size(); i++) {
@@ -111,7 +139,11 @@ public final class RedisShardedCluster implements Redis {
 
                 final String nodeId = jedis.clusterMyId();
                 mainNodeIdsByPort.put(port, nodeId);
-                jedis.clusterAddSlots(IntStream.range(startSlot, endSlot + 1).toArray());
+                // A restarted cluster restored its slot assignments from nodes.conf; adding them again would
+                // fail with 'Slot X is already busy'
+                if (!jedis.clusterInfo().contains("cluster_slots_assigned:16384")) {
+                    jedis.clusterAddSlots(IntStream.range(startSlot, endSlot + 1).toArray());
+                }
             } catch (final Exception e) {
                 throw new RedisClusterSetupException("Failed creating main node instance at port: " + port, e);
             }

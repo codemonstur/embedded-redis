@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static redis.embedded.Redis.DEFAULT_REDIS_PORT;
@@ -28,6 +29,9 @@ public final class RedisServerBuilder {
     private Consumer<String> serrListener;
 
     private StringBuilder redisConfigBuilder = new StringBuilder();
+    // Per-node settings, cleared by reset(): shared builders build many servers and must not accumulate
+    // one node's settings into the next node's config file
+    private StringBuilder nodeSettings = new StringBuilder();
 
     public RedisServerBuilder executableProvider(final ExecutableProvider provider) {
         this.provider = provider;
@@ -58,7 +62,9 @@ public final class RedisServerBuilder {
         return configFile(Paths.get(redisConf));
     }
     public RedisServerBuilder configFile(final Path redisConf) throws IOException {
-        Files.lines(redisConf).forEach(line -> redisConfigBuilder.append(line).append(LINE_SEPARATOR));
+        try (final Stream<String> lines = Files.lines(redisConf)) {
+            lines.forEach(line -> redisConfigBuilder.append(line).append(LINE_SEPARATOR));
+        }
         return this;
     }
 
@@ -69,6 +75,13 @@ public final class RedisServerBuilder {
 
     public RedisServerBuilder setting(final String configLine) {
         redisConfigBuilder.append(configLine).append(LINE_SEPARATOR);
+        return this;
+    }
+
+    // Unlike setting(), the line only applies to the next-built server: dropped again by reset(), so builders
+    // shared between the nodes of a cluster don't carry the settings of one node into the next one
+    public RedisServerBuilder settingForNextBuild(final String configLine) {
+        nodeSettings.append(configLine).append(LINE_SEPARATOR);
         return this;
     }
 
@@ -92,13 +105,19 @@ public final class RedisServerBuilder {
 
     public void reset() {
         this.slaveOf = null;
+        this.nodeSettings.setLength(0);
     }
 
     public List<String> buildCommandArgs() throws IOException {
-        setting("bind " + bindAddress);
+        // Composed fresh on every build and without mutating this builder: the bind line goes first so that
+        // an explicit bind from setting()/settingForNextBuild()/configFile() can override the default
+        final StringBuilder config = new StringBuilder();
+        config.append("bind ").append(bindAddress).append(LINE_SEPARATOR);
+        config.append(redisConfigBuilder);
+        config.append(nodeSettings);
 
         final Path redisConfigFile =
-            writeNewRedisConfigFile("embedded-redis-server_" + bindPort, redisConfigBuilder.toString());
+            writeNewRedisConfigFile("embedded-redis-server_" + bindPort, config.toString());
 
         final List<String> args = new ArrayList<>();
         args.add(provider.get().getAbsolutePath());

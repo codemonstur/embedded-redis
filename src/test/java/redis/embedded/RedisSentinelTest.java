@@ -1,23 +1,28 @@
 package redis.embedded;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
+import redis.embedded.util.JedisUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Inet4Address;
-import java.util.concurrent.TimeUnit;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
 import static redis.embedded.RedisSentinel.SENTINEL_READY_PATTERN;
 import static redis.embedded.util.Collections.newHashSet;
+import static redis.embedded.util.JedisUtil.awaitMasterDiscovery;
 
 public class RedisSentinelTest {
+    private static final String MASTER_NAME = "mymaster";
+
     private String bindAddress;
 
     private RedisSentinel sentinel;
@@ -32,20 +37,20 @@ public class RedisSentinelTest {
         }
     }
 
-    @Test(timeout = 3000L)
-    public void testSimpleRun() throws InterruptedException, IOException {
-        server = new RedisServer();
-        sentinel = RedisSentinel.newRedisSentinel().bind(bindAddress).build();
+    @Test(timeout = 60_000L)
+    public void testSimpleRun() throws Exception {
+        server = newRedisServerOnFreePort();
+        sentinel = newSentinelOnFreePort(server.ports().get(0));
         sentinel.start();
         server.start();
-        TimeUnit.SECONDS.sleep(1);
         server.stop();
         sentinel.stop();
     }
 
     @Test
     public void shouldAllowSubsequentRuns() throws IOException {
-        sentinel = RedisSentinel.newRedisSentinel().bind(bindAddress).build();
+        final int port = JedisUtil.newFreePort();
+        sentinel = RedisSentinel.newRedisSentinel().port(port).bind(bindAddress).build();
         sentinel.start();
         sentinel.stop();
 
@@ -57,17 +62,21 @@ public class RedisSentinelTest {
     }
 
     @Test
-    public void testSimpleOperationsAfterRun() throws InterruptedException, IOException {
-        server = new RedisServer();
-        sentinel = RedisSentinel.newRedisSentinel().bind(bindAddress).build();
+    public void testSimpleOperationsAfterRun() throws IOException {
+        server = newRedisServerOnFreePort();
+        sentinel = newSentinelOnFreePort(server.ports().get(0));
         server.start();
         sentinel.start();
-        TimeUnit.SECONDS.sleep(1);
+
+        final Set<String> sentinelHosts = newHashSet("localhost:" + sentinel.ports().get(0));
 
         JedisSentinelPool pool = null;
         Jedis jedis = null;
         try {
-            pool = new JedisSentinelPool("mymaster", newHashSet("localhost:26379"));
+            // Sentinel discovery of the master is asynchronous; wait for it instead of sleeping for a fixed time
+            awaitMasterDiscovery(MASTER_NAME, sentinelHosts);
+
+            pool = JedisUtil.newSentinelPool(MASTER_NAME, sentinelHosts);
             jedis = pool.getResource();
             jedis.mset("abc", "1", "def", "2");
 
@@ -91,6 +100,18 @@ public class RedisSentinelTest {
         assertReadyPattern("/redis-2.x-sentinel-startup-output.txt", SENTINEL_READY_PATTERN);
         assertReadyPattern("/redis-3.x-sentinel-startup-output.txt", SENTINEL_READY_PATTERN);
         assertReadyPattern("/redis-4.x-sentinel-startup-output.txt", SENTINEL_READY_PATTERN);
+    }
+
+    private RedisServer newRedisServerOnFreePort() throws IOException {
+        return new RedisServer(JedisUtil.newFreePort());
+    }
+
+    private RedisSentinel newSentinelOnFreePort(final int masterPort) {
+        return RedisSentinel.newRedisSentinel()
+                .port(JedisUtil.newFreePort())
+                .masterPort(masterPort)
+                .bind(bindAddress)
+                .build();
     }
 
     private static void assertReadyPattern(final String resourcePath, final Pattern readyPattern) throws IOException {

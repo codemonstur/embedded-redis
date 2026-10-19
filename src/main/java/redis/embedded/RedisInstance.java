@@ -3,16 +3,23 @@ package redis.embedded;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.AccessDeniedException;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import static redis.embedded.util.IO.*;
 
 public abstract class RedisInstance implements Redis {
+
+    // A binary that never signals readiness (missing libraries, wrong architecture, ...) would otherwise block
+    // the caller forever. Override with -Dembedded-redis.readyTimeoutSeconds=N
+    private static final int READY_TIMEOUT_SECONDS = Integer.getInteger("embedded-redis.readyTimeoutSeconds", 60);
+    // A wedged process would otherwise hang the shutdown of the test-suite forever.
+    // Override with -Dembedded-redis.stopTimeoutSeconds=N
+    private static final int STOP_TIMEOUT_SECONDS = Integer.getInteger("embedded-redis.stopTimeoutSeconds", 15);
 
     private final Pattern readyPattern;
     private final int port;
@@ -23,6 +30,7 @@ public abstract class RedisInstance implements Redis {
 
     private volatile boolean active = false;
     private Process process;
+    private Thread shutdownHook;
 
     protected RedisInstance(final int port, final List<String> args, final Pattern readyPattern,
                             final boolean forceStop, final Consumer<String> soutListener,
@@ -45,19 +53,22 @@ public abstract class RedisInstance implements Redis {
             throw new AccessDeniedException("Redis binary " + args.get(0) + " is not executable");
 
         try {
-            process = new ProcessBuilder(args)
+            final Process startedProcess = new ProcessBuilder(args)
                 .directory(executable.getParentFile())
                 .start();
-            addShutdownHook("RedisInstanceCleaner", checkedToRuntime(this::stop));
-            awaitServerReady(process, readyPattern, soutListener, serrListener);
+            process = startedProcess;
+            shutdownHook = new Thread(checkedToRuntime(this::stop), "RedisInstanceCleaner");
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
+            awaitServerReady(startedProcess, readyPattern, soutListener, serrListener);
 
-            if (serrListener != null)
-                newDaemonThread(() -> logStream(process.getErrorStream(), serrListener)).start();
-            if (soutListener != null)
-                newDaemonThread(() -> logStream(process.getInputStream(), soutListener)).start();
+            // Both streams are drained unconditionally: redis logs to stdout by default and blocks once the
+            // pipe fills up, so even without listeners the output has to be read (and then simply discarded)
+            newDaemonThread(() -> logStream(startedProcess.getErrorStream(), serrListener)).start();
+            newDaemonThread(() -> logStream(startedProcess.getInputStream(), soutListener)).start();
 
             active = true;
         } catch (final IOException e) {
+            removeShutdownHook();
             throw new IOException("Failed to start Redis service", e);
         }
     }
@@ -88,35 +99,70 @@ public abstract class RedisInstance implements Redis {
     private static void awaitServerReady(final Process process, final Pattern readyPattern
             , final Consumer<String> soutListener, final Consumer<String> serrListener) throws IOException {
         final StringBuilder log = new StringBuilder();
-        if (!findMatchInStream(process.getInputStream(), readyPattern, soutListener, log)) {
-            final String stdOut = log.toString();
-            final String stdErr = readFully(process.getErrorStream(), serrListener);
+        final boolean ready = findMatchInStream(process.getInputStream(), readyPattern, soutListener, log
+                , TimeUnit.SECONDS.toMillis(READY_TIMEOUT_SECONDS));
+        if (ready) return;
 
-            throw new IOException("Redis-server process appears not to have started. "
-                + (isNullOrEmpty(stdOut) ? "No output was found in standard-out." : "stdandard-out contains this: " + stdOut)
-                + " "
-                + (isNullOrEmpty(stdErr) ? "No output was found in standard-err." : "stdandard-err contains this: " + stdErr)
-            );
+        // The process never signaled readiness. Stop it before reading the error-stream: reading the stderr of a
+        // process that is still running would block until it exits, turning a startup failure into a hung build.
+        final boolean timedOut = process.isAlive();
+        process.destroyForcibly();
+        try {
+            process.waitFor(READY_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
+
+        final String stdOut = log.toString();
+        final String stdErr = readFully(process.getErrorStream(), serrListener);
+
+        throw new IOException("Redis-server process appears not to have started. "
+            + (timedOut ? "It did not print '" + readyPattern + "' within " + READY_TIMEOUT_SECONDS + " seconds. " : "")
+            + (isNullOrEmpty(stdOut) ? "No output was found in standard-out." : "standard-out contains this: " + stdOut)
+            + " "
+            + (isNullOrEmpty(stdErr) ? "No output was found in standard-err." : "standard-err contains this: " + stdErr)
+        );
     }
     private static boolean isNullOrEmpty(final String value) {
         return value == null || value.isEmpty();
     }
 
     public synchronized void stop() throws IOException {
-        if (!active) return;
+        removeShutdownHook();
+        if (process == null) return;
 
         try {
-            if (forceStop)
+            if (forceStop) {
                 process.destroyForcibly();
-            else {
+                // Waiting for the process to actually die frees its port before stop() returns
+                process.waitFor(STOP_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            } else {
                 process.destroy();
-                process.waitFor();
+                // A process that ignores the destroy signal would otherwise hang the build forever
+                if (!process.waitFor(STOP_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                    process.destroyForcibly();
+                    process.waitFor(STOP_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                }
             }
-            active = false;
         } catch (final InterruptedException e) {
+            process.destroyForcibly();
+            Thread.currentThread().interrupt();
             throw new IOException("Failed to stop redis service", e);
+        } finally {
+            active = false;
         }
+    }
+
+    // Unregistered once stopped: a stale hook would pin this instance in memory until the JVM exits, and
+    // instances that are started repeatedly would pile up one hook per start
+    private void removeShutdownHook() {
+        if (shutdownHook == null) return;
+        try {
+            Runtime.getRuntime().removeShutdownHook(shutdownHook);
+        } catch (final IllegalStateException ignored) {
+            // The JVM is already shutting down and running shutdown-hooks cannot be removed
+        }
+        shutdownHook = null;
     }
 
     public boolean isActive() {

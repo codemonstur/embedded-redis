@@ -34,22 +34,46 @@ public final class RedisCluster implements Redis {
 
     @Override
     public void start() throws IOException {
-        for (final Redis redis : sentinels) {
-            redis.start();
-        }
-        for (final Redis redis : servers) {
-            redis.start();
+        final List<Redis> started = new ArrayList<>();
+        try {
+            for (final Redis redis : sentinels) {
+                redis.start();
+                started.add(redis);
+            }
+            for (final Redis redis : servers) {
+                redis.start();
+                started.add(redis);
+            }
+        } catch (final IOException | RuntimeException e) {
+            // Don't leave half a cluster running: the started instances would keep their ports bound
+            try {
+                stopAll(started);
+            } catch (final IOException stopFailure) {
+                e.addSuppressed(stopFailure);
+            }
+            throw e;
         }
     }
 
     @Override
     public void stop() throws IOException {
-        for (final Redis redis : sentinels) {
-            redis.stop();
+        final List<Redis> all = new ArrayList<>(sentinels);
+        all.addAll(servers);
+        stopAll(all);
+    }
+
+    // Stops every instance even if one of them fails, so a single wedged process doesn't leak the others
+    private static void stopAll(final List<Redis> instances) throws IOException {
+        IOException failure = null;
+        for (final Redis redis : instances) {
+            try {
+                redis.stop();
+            } catch (final IOException e) {
+                if (failure == null) failure = e;
+                else failure.addSuppressed(e);
+            }
         }
-        for (final Redis redis : servers) {
-            redis.stop();
-        }
+        if (failure != null) throw failure;
     }
 
     @Override

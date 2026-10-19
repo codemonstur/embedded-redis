@@ -5,10 +5,13 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.embedded.core.ExecutableProvider;
 import redis.embedded.model.OsArchitecture;
+import redis.embedded.util.JedisUtil;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
@@ -23,18 +26,20 @@ public class RedisServerTest {
 
 	private RedisServer redisServer;
 
-	@Test(timeout = 1500L)
+	// start() blocks until the server prints its ready-line, so no sleeps are needed here; the generous
+	// timeout only guards against a binary that unpacks slowly on a cold ci machine
+	@Test(timeout = 60_000L)
 	public void testSimpleRun() throws Exception {
-		redisServer = new RedisServer(6381);
+		redisServer = new RedisServer(JedisUtil.newFreePort());
 		redisServer.start();
-		Thread.sleep(1000L);
 		redisServer.stop();
 	}
 
 	@Test
 	public void shouldAllowMultipleRunsWithoutStop() throws IOException {
+		final int port = JedisUtil.newFreePort();
 		try {
-			redisServer = new RedisServer(6381);
+			redisServer = new RedisServer(port);
 			redisServer.start();
 			redisServer.start();
 		} finally {
@@ -44,7 +49,8 @@ public class RedisServerTest {
 
 	@Test
 	public void shouldAllowSubsequentRuns() throws IOException {
-		redisServer = new RedisServer(6381);
+		final int port = JedisUtil.newFreePort();
+		redisServer = new RedisServer(port);
 		redisServer.start();
 		redisServer.stop();
 
@@ -55,12 +61,40 @@ public class RedisServerTest {
 		redisServer.stop();
 	}
 
+	// Regression test: the ready-line used to close the process stdout, which silenced the listener for
+	// good and discarded every line the server logged after startup
+	@Test(timeout = 60_000L)
+	public void shouldStreamOutputToListenerAfterReady() throws Exception {
+		final List<String> lines = new CopyOnWriteArrayList<>();
+		final int port = JedisUtil.newFreePort();
+		redisServer = newRedisServer().port(port).soutListener(lines::add).build();
+		try {
+			redisServer.start();
+			try (final Jedis jedis = new Jedis("127.0.0.1", port)) {
+				assertEquals("OK", jedis.save());
+			}
+			awaitListenerLine(lines, "DB saved on disk");
+		} finally {
+			redisServer.stop();
+		}
+	}
+
+	private static void awaitListenerLine(final List<String> lines, final String expected) throws InterruptedException {
+		final long deadline = System.currentTimeMillis() + 10_000;
+		while (System.currentTimeMillis() < deadline) {
+			if (lines.stream().anyMatch(line -> line.contains(expected))) return;
+			Thread.sleep(50);
+		}
+		fail("The listener never received a line containing '" + expected + "', it received: " + lines);
+	}
+
 	@Test
 	public void testSimpleOperationsAfterRun() throws IOException {
-		redisServer = new RedisServer(6381);
+		final int port = JedisUtil.newFreePort();
+		redisServer = new RedisServer(port);
 		redisServer.start();
 
-		try (final JedisPool pool = new JedisPool("localhost", 6381);
+		try (final JedisPool pool = JedisUtil.newPool(port);
              final Jedis jedis = pool.getResource()) {
 			jedis.mset("abc", "1", "def", "2");
 
@@ -74,13 +108,13 @@ public class RedisServerTest {
 
     @Test
     public void shouldIndicateInactiveBeforeStart() throws IOException {
-        redisServer = new RedisServer(6381);
+        redisServer = new RedisServer(JedisUtil.newFreePort());
         assertFalse(redisServer.isActive());
     }
 
     @Test
     public void shouldIndicateActiveAfterStart() throws IOException {
-        redisServer = new RedisServer(6381);
+        redisServer = new RedisServer(JedisUtil.newFreePort());
         redisServer.start();
         assertTrue(redisServer.isActive());
         redisServer.stop();
@@ -88,7 +122,7 @@ public class RedisServerTest {
 
     @Test
     public void shouldIndicateInactiveAfterStop() throws IOException {
-        redisServer = new RedisServer(6381);
+        redisServer = new RedisServer(JedisUtil.newFreePort());
         redisServer.start();
         redisServer.stop();
         assertFalse(redisServer.isActive());

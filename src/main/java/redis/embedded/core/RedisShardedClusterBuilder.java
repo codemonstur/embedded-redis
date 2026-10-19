@@ -71,10 +71,10 @@ public final class RedisShardedClusterBuilder {
             replicaPorts.add(replicaPort);
             serverBuilder.reset();
             serverBuilder.port(replicaPort);
-            serverBuilder.setting("cluster-enabled yes");
-            serverBuilder.setting("cluster-config-file nodes-replica-" + replicaPort + ".conf");
-            serverBuilder.setting("cluster-node-timeout 5000");
-            serverBuilder.setting("appendonly no");
+            serverBuilder.settingForNextBuild("cluster-enabled yes");
+            serverBuilder.settingForNextBuild("cluster-config-file nodes-replica-" + replicaPort + ".conf");
+            serverBuilder.settingForNextBuild("cluster-node-timeout 5000");
+            serverBuilder.settingForNextBuild("appendonly no");
             final RedisServer slave = serverBuilder.build();
             replicas.add(slave);
         }
@@ -84,10 +84,10 @@ public final class RedisShardedClusterBuilder {
     private RedisServer buildMainNode(final Shard shard) throws IOException {
         replicasPortsByMainNodePort.put(shard.mainNodePort, new HashSet<>());
         serverBuilder.reset();
-        serverBuilder.setting("cluster-enabled yes");
-        serverBuilder.setting("cluster-config-file nodes-main-" + shard.mainNodePort + ".conf");
-        serverBuilder.setting("cluster-node-timeout 5000");
-        serverBuilder.setting("appendonly no");
+        serverBuilder.settingForNextBuild("cluster-enabled yes");
+        serverBuilder.settingForNextBuild("cluster-config-file nodes-main-" + shard.mainNodePort + ".conf");
+        serverBuilder.settingForNextBuild("cluster-node-timeout 5000");
+        serverBuilder.settingForNextBuild("appendonly no");
         return serverBuilder.port(shard.mainNodePort).build();
     }
 

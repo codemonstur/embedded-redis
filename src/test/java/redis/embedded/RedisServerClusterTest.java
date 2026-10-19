@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.embedded.util.JedisUtil;
 
 import java.io.IOException;
 
@@ -17,15 +18,26 @@ public class RedisServerClusterTest {
     private RedisServer redisServer1;
     private RedisServer redisServer2;
 
+    private int masterPort;
+
     @Before
     public void setUp() throws IOException {
-        redisServer1 = newRedisServer().port(6300).build();
-        redisServer2 = newRedisServer().port(6301)
-                .slaveOf("localhost", 6300)
+        masterPort = JedisUtil.newFreePort();
+        final int slavePort = JedisUtil.newFreePort();
+
+        redisServer1 = newRedisServer().port(masterPort).build();
+        redisServer2 = newRedisServer().port(slavePort)
+                .slaveOf("localhost", masterPort)
                 .build();
 
-        redisServer1.start();
-        redisServer2.start();
+        try {
+            redisServer1.start();
+            redisServer2.start();
+        } catch (final IOException e) {
+            // stop() is a no-op on instances that never started, so nothing that started is left running
+            tearDown();
+            throw e;
+        }
     }
 
     @Test
@@ -33,7 +45,7 @@ public class RedisServerClusterTest {
         JedisPool pool = null;
         Jedis jedis = null;
         try {
-            pool = new JedisPool("localhost", 6300);
+            pool = JedisUtil.newPool(masterPort);
             jedis = pool.getResource();
             jedis.mset("abc", "1", "def", "2");
 
