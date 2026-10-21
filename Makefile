@@ -47,6 +47,7 @@ list-dependencies:
 	@mvn dependency:tree
 
 release-notes:
+	@mkdir -p src/docs/releases
 	@$(INFO) "Writing release notes to src/docs/releases/release-$(VERSION).txt"
 	@echo "$(VERSION)" >> src/docs/releases/release-$(VERSION).txt
 	@echo "" >> src/docs/releases/release-$(VERSION).txt
