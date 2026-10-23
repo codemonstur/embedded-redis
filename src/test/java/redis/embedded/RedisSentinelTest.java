@@ -1,8 +1,8 @@
 package redis.embedded;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.embedded.util.JedisUtil;
@@ -15,7 +15,8 @@ import java.net.Inet4Address;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.*;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.jupiter.api.Assertions.*;
 import static redis.embedded.RedisSentinel.SENTINEL_READY_PATTERN;
 import static redis.embedded.util.Collections.newHashSet;
 import static redis.embedded.util.JedisUtil.awaitMasterDiscovery;
@@ -28,7 +29,7 @@ public class RedisSentinelTest {
     private RedisSentinel sentinel;
     private RedisServer server;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         // Jedis translates ”localhost” to getLocalHost().getHostAddress() (see Jedis HostAndPort#getLocalHostQuietly),
         // which can vary from 127.0.0.1 (most notably, Debian/Ubuntu return 127.0.1.1)
@@ -37,7 +38,8 @@ public class RedisSentinelTest {
         }
     }
 
-    @Test(timeout = 60_000L)
+    @Test
+    @Timeout(value = 60, unit = SECONDS)
     public void testSimpleRun() throws Exception {
         server = newRedisServerOnFreePort();
         sentinel = newSentinelOnFreePort(server.ports().get(0));

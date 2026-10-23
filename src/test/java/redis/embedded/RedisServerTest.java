@@ -1,6 +1,7 @@
 package redis.embedded;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.embedded.core.ExecutableProvider;
@@ -12,9 +13,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.*;
+import static java.util.concurrent.TimeUnit.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static redis.embedded.RedisServer.SERVER_READY_PATTERN;
 import static redis.embedded.RedisServer.newRedisServer;
 import static redis.embedded.core.ExecutableProvider.newJarResourceProvider;
@@ -28,7 +31,8 @@ public class RedisServerTest {
 
 	// start() blocks until the server prints its ready-line, so no sleeps are needed here; the generous
 	// timeout only guards against a binary that unpacks slowly on a cold ci machine
-	@Test(timeout = 60_000L)
+	@Test
+	@Timeout(value = 60, unit = SECONDS)
 	public void testSimpleRun() throws Exception {
 		redisServer = new RedisServer(JedisUtil.newFreePort());
 		redisServer.start();
@@ -63,7 +67,8 @@ public class RedisServerTest {
 
 	// Regression test: the ready-line used to close the process stdout, which silenced the listener for
 	// good and discarded every line the server logged after startup
-	@Test(timeout = 60_000L)
+	@Test
+	@Timeout(value = 60, unit = SECONDS)
 	public void shouldStreamOutputToListenerAfterReady() throws Exception {
 		final List<String> lines = new CopyOnWriteArrayList<>();
 		final int port = JedisUtil.newFreePort();
@@ -143,8 +148,8 @@ public class RedisServerTest {
 			.build();
     }
 
-    @Test(expected = FileNotFoundException.class)
-    public void shouldFailWhenBadExecutableGiven() throws IOException {
+    @Test
+    public void shouldFailWhenBadExecutableGiven() {
 		final Map<OsArchitecture, String> buggyMap = new HashMap<>();
 		buggyMap.put(UNIX_x86, "some");
 		buggyMap.put(UNIX_x86_64, "some");
@@ -154,9 +159,9 @@ public class RedisServerTest {
 		buggyMap.put(MAC_OS_X_x86_64, "some");
 		buggyMap.put(MAC_OS_X_ARM64, "some");
 
-        redisServer = newRedisServer()
+		assertThrows(FileNotFoundException.class, () -> newRedisServer()
 			.executableProvider(newJarResourceProvider(buggyMap))
-			.build();
+			.build());
     }
 
 	@Test

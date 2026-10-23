@@ -1,21 +1,23 @@
 package redis.embedded;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisCluster;
 import redis.embedded.util.JedisUtil;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static redis.embedded.RedisShardedCluster.newRedisCluster;
 
 public class RedisShardedClusterTest {
 	private RedisShardedCluster cluster;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
 		cluster = newCluster();
 		cluster.start();
@@ -25,7 +27,7 @@ public class RedisShardedClusterTest {
     public void testSimpleOperationsAfterClusterStart() {
         try (final JedisCluster jc = JedisUtil.newCluster(new HostAndPort("127.0.0.1", cluster.getPort()))) {
             jc.set("somekey", "somevalue");
-            assertEquals("the value should be equal", "somevalue", jc.get("somekey"));
+            assertEquals( "somevalue", jc.get("somekey"), "the value should be equal");
         }
     }
 
@@ -36,19 +38,20 @@ public class RedisShardedClusterTest {
 		cluster.start();
 		try (final JedisCluster jc = JedisUtil.newCluster(new HostAndPort("127.0.0.1", cluster.getPort()))) {
 			jc.set("somekey", "somevalue");
-			assertEquals("the value should be equal", "somevalue", jc.get("somekey"));
+			assertEquals("somevalue", jc.get("somekey"), "the value should be equal");
 		}
 	}
 
 	// Regression test: a restarted cluster restored its slot assignments from nodes.conf, and the setup
 	// then failed with 'Slot X is already busy'
-	@Test(timeout = 120_000L)
+	@Test
+	@Timeout(value = 120, unit = SECONDS)
 	public void testRestartOfTheSameCluster() throws IOException {
 		cluster.stop();
 		cluster.start();
 		try (final JedisCluster jc = JedisUtil.newCluster(new HostAndPort("127.0.0.1", cluster.getPort()))) {
 			jc.set("somekey", "somevalue");
-			assertEquals("the value should be equal", "somevalue", jc.get("somekey"));
+			assertEquals("somevalue", jc.get("somekey"), "the value should be equal");
 		}
 	}
 
@@ -60,7 +63,7 @@ public class RedisShardedClusterTest {
              .build();
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         if (cluster != null) {
             cluster.stop();

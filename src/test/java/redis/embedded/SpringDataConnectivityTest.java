@@ -1,8 +1,6 @@
 package redis.embedded;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -10,7 +8,7 @@ import redis.embedded.util.JedisUtil;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SpringDataConnectivityTest {
 
@@ -20,7 +18,7 @@ public class SpringDataConnectivityTest {
 
     private int port;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         port = JedisUtil.newFreePort();
         redisServer = new RedisServer(port);
@@ -45,7 +43,7 @@ public class SpringDataConnectivityTest {
         assertEquals("bar", result);
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         // Releases the pooled connections first, otherwise they can still hold the port when the server stops
         if (connectionFactory != null) {

@@ -1,8 +1,8 @@
 package redis.embedded;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.jedis.exceptions.JedisDataException;
@@ -19,11 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static redis.embedded.RedisCluster.newRedisCluster;
 import static redis.embedded.util.JedisUtil.awaitMasterDiscovery;
 
@@ -40,7 +36,7 @@ public class RedisClusterTest {
 
     private RedisCluster instance;
 
-    @Before
+    @BeforeEach
     public void setUp() throws UnknownHostException {
         sentinel1 = new FakeRedis();
         sentinel2 = new FakeRedis();
@@ -55,7 +51,7 @@ public class RedisClusterTest {
         }
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException {
         // stop() is a no-op on nodes that never started, so a partially started cluster is fully cleaned up
         if (instance != null) {
@@ -69,10 +65,10 @@ public class RedisClusterTest {
 
         instance.stop();
 
-        assertTrue("sentinel1 should have been stopped", sentinel1.stopped());
-        assertTrue("sentinel2 should have been stopped", sentinel2.stopped());
-        assertTrue("master1 should have been stopped", master1.stopped());
-        assertTrue("master2 should have been stopped", master2.stopped());
+        assertTrue(sentinel1.stopped(), "sentinel1 should have been stopped");
+        assertTrue(sentinel2.stopped(), "sentinel2 should have been stopped");
+        assertTrue(master1.stopped(), "master1 should have been stopped");
+        assertTrue(master2.stopped(), "master2 should have been stopped");
     }
 
     @Test
@@ -81,14 +77,14 @@ public class RedisClusterTest {
 
         instance.start();
 
-        assertTrue("sentinel1 should have been started", sentinel1.started());
-        assertTrue("sentinel2 should have been started", sentinel2.started());
-        assertTrue("master1 should have been started", master1.started());
-        assertTrue("master2 should have been started", master2.started());
+        assertTrue(sentinel1.started(), "sentinel1 should have been started");
+        assertTrue(sentinel2.started(), "sentinel2 should have been started");
+        assertTrue(master1.started(), "master1 should have been started");
+        assertTrue(master2.started(), "master2 should have been started");
     }
 
     @Test
-    public void isActiveShouldCheckEntireClusterIfAllActive() throws IOException {
+    public void isActiveShouldCheckEntireClusterIfAllActive() {
         sentinel1.setActive(true);
         sentinel2.setActive(true);
         master1.setActive(true);
@@ -177,8 +173,8 @@ public class RedisClusterTest {
                     sentinel.ping();
                     fail("Sentinel should require the configured password");
                 } catch (final JedisDataException e) {
-                    assertTrue("expected a NOAUTH error but got: " + e.getMessage(),
-                            e.getMessage().contains("NOAUTH"));
+                    assertTrue(e.getMessage().contains("NOAUTH"),
+                            "expected a NOAUTH error but got: " + e.getMessage());
                 }
                 sentinel.auth(password);
                 assertEquals("PONG", sentinel.ping());

@@ -1,12 +1,12 @@
 package redis.embedded.ports;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import redis.embedded.core.PortProvider;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static redis.embedded.core.PortProvider.newEphemeralPortProvider;
 
 public class EphemeralPortProviderTest {

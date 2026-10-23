@@ -1,16 +1,16 @@
 package redis.embedded;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.embedded.util.JedisUtil;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static redis.embedded.RedisServer.newRedisServer;
 
 public class RedisServerClusterTest {
@@ -20,7 +20,7 @@ public class RedisServerClusterTest {
 
     private int masterPort;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         masterPort = JedisUtil.newFreePort();
         final int slavePort = JedisUtil.newFreePort();
@@ -63,7 +63,7 @@ public class RedisServerClusterTest {
     }
 
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException {
         redisServer1.stop();
         redisServer2.stop();
