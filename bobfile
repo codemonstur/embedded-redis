@@ -1,0 +1,25 @@
+include https://raw.githubusercontent.com/codemonstur/bobfiles/master/foss-lib-github-maven
+
+vendor: com.github.codemonstur
+name: embedded-redis
+version: 1.4.4
+packaging: jar
+release: 8
+enablePreview: false
+description: Redis embedded server for Java integration testing. Project forked from https://github.com/ozimov/embedded-redis. Which was forked from https://github.com/kstyrc/embedded-redis
+license:
+  name: MIT
+developer:
+  name: Jurgen Voorneveld
+  email: jegvoorneveld@gmail.com
+dependencies:
+  - repository: redis.clients:jedis:3.8.0
+  - repository: org.springframework.data:spring-data-redis:2.7.18
+    scope: test
+  - repository: org.junit.jupiter:junit-jupiter:6.1.3
+    scope: test
+  - repository: org.mockito:mockito-core:5.23.0
+    scope: test
+  - repository: org.slf4j:slf4j-nop:1.7.36
+    scope: test
+
