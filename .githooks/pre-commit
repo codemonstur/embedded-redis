@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+
+branch=$(git branch --show-current)
+case "$branch" in
+  main|master) ;;
+  *) exit 0 ;;
+esac
+
+timestamp=$(date +%s)
+report="src/docs/quality/codegrade-${timestamp}.json"
+
+mkdir -p src/docs/quality
+
+mvn -q -N com.github.codemonstur:codegrade-maven-plugin:0.2.0:check \
+  -Dcodegrade.format=JSON \
+  -Dcodegrade.outputFile="$report"
+
+git add "$report"
