@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help clean build test coverage validate release-notes deploy build-arm
+.PHONY: help clean build test coverage validate release-notes deploy build-arm mutation
 
 NAME=`xmllint --xpath "//project/artifactId/text()" pom.xml`
 VERSION=`xmllint --xpath "//project/version/text()" pom.xml`
@@ -35,6 +35,12 @@ coverage: ## Run tests and generate a jacoco coverage report
 	@$(INFO) "Coverage report written to target/site/jacoco/index.html"
 	@output=$$(java src/build/CoverageSummary.java target/site/jacoco/jacoco.csv) || exit $$?; \
 	printf '%s\n' "$$output" | while IFS= read -r line; do $(INFO) "$$line"; done
+
+mutation: ## Run mutation tests on the unit tests
+	@$(INFO) "Running mutation tests"
+	@mvn -P mutation test
+	@$(INFO) "Mutation report written to target/pit-reports/index.html"
+
 
 validate: ## Check dependency versions, cves, licenses, and code quality
 	@mvn com.github.codemonstur:maven-check-pom:1.0.0:check validate

@@ -1,0 +1,1421 @@
+{
+  "target": "/home/jurgen/projects/libraries/embedded-redis",
+  "files": 37,
+  "unixTimestamp": 1793313257,
+  "iso8601": "2026-10-29T22:34:17.052230674Z",
+  "generatedAt": "Thursday, October 29, 2026 22:34:17 UTC",
+  "durationMillis": 1812,
+  "duration": "1.812 s",
+  "score": 92.6,
+  "checks": [
+    {
+      "id": "long-file",
+      "description": "Files should stay under 150 lines, counting Javadoc as one",
+      "filesChecked": 37,
+      "filesFailing": 6,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/RedisInstance.java",
+          "line": 177
+        },
+        {
+          "path": "src/main/java/redis/embedded/RedisShardedCluster.java",
+          "line": 210
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/ExecutableProvider.java",
+          "line": 161
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisSentinelBuilder.java",
+          "line": 191
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisClusterTest.java",
+          "line": 300
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisServerTest.java",
+          "line": 187
+        }
+      ]
+    },
+    {
+      "id": "long-line",
+      "description": "Lines should stay under 120 characters",
+      "filesChecked": 37,
+      "filesFailing": 5,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/RedisShardedCluster.java",
+          "line": 170
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/ExecutableProvider.java",
+          "line": 34
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisSentinelBuilder.java",
+          "line": 95
+        },
+        {
+          "path": "src/main/java/redis/embedded/util/IO.java",
+          "line": 33
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisClusterTest.java",
+          "line": 188
+        }
+      ]
+    },
+    {
+      "id": "blank-lines",
+      "description": "Avoid multiple consecutive blank lines",
+      "filesChecked": 37,
+      "filesFailing": 1,
+      "violations": [
+        {
+          "path": "src/test/java/redis/embedded/RedisServerClusterTest.java",
+          "line": 64
+        }
+      ]
+    },
+    {
+      "id": "trailing-whitespace",
+      "description": "Lines should not have trailing whitespace",
+      "filesChecked": 37,
+      "filesFailing": 1,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/model/OsArchitecture.java",
+          "line": 11
+        }
+      ]
+    },
+    {
+      "id": "tab-indent",
+      "description": "Indent with spaces, not tabs",
+      "filesChecked": 37,
+      "filesFailing": 3,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/RedisServer.java",
+          "line": 20
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisServerTest.java",
+          "line": 30
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisShardedClusterTest.java",
+          "line": 18
+        }
+      ]
+    },
+    {
+      "id": "newline-eof",
+      "description": "Files should end with a newline",
+      "filesChecked": 37,
+      "filesFailing": 2,
+      "violations": [
+        {
+          "path": "src/test/java/redis/embedded/ports/PredefinedPortProviderTest.java",
+          "line": 42
+        },
+        {
+          "path": "src/test/java/redis/embedded/ports/SequencePortProviderTest.java",
+          "line": 28
+        }
+      ]
+    },
+    {
+      "id": "empty-file",
+      "description": "Files should not be empty",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "star-imports",
+      "description": "Avoid wildcard (star) imports",
+      "filesChecked": 37,
+      "filesFailing": 11,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/RedisInstance.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/RedisShardedCluster.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/ExecutableProvider.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisClusterBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisShardedClusterBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/util/IO.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/architecture/TestArchitecture.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisClusterTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisSentinelTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisServerTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/SpringDataConnectivityTest.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "unused-imports",
+      "description": "Remove unused imports",
+      "filesChecked": 37,
+      "filesFailing": 3,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/core/ExecutableProvider.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisServerTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/tools/DownloadUriTest.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "class-name-case",
+      "description": "Class names should be PascalCase",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "method-name-case",
+      "description": "Method/field names should be camelCase",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "exception-name",
+      "description": "Exceptions should not end in Exception",
+      "filesChecked": 37,
+      "filesFailing": 1,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/error/RedisClusterSetupException.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "oop-name",
+      "description": "Avoid OOP-role suffixes in class names",
+      "filesChecked": 37,
+      "filesFailing": 6,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/core/ExecutableProvider.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/PortProvider.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisClusterBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisSentinelBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisServerBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisShardedClusterBuilder.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "long-names",
+      "description": "Avoid overly long class/method names",
+      "filesChecked": 37,
+      "filesFailing": 4,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/core/PortProvider.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisClusterTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisShardedClusterTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/ports/PredefinedPortProviderTest.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "single-letter-var",
+      "description": "Avoid single-letter variable names",
+      "filesChecked": 37,
+      "filesFailing": 3,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/core/RedisClusterBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/model/OsArchitecture.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/util/JedisUtil.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "constant-naming",
+      "description": "static final fields should be UPPER_SNAKE_CASE",
+      "filesChecked": 37,
+      "filesFailing": 1,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/model/OsArchitecture.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "boolean-method-name",
+      "description": "Boolean methods should start with is/has/can/should",
+      "filesChecked": 37,
+      "filesFailing": 4,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/RedisShardedCluster.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/model/OsArchitecture.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/util/IO.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisClusterTest.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "default-package",
+      "description": "Classes should declare a package",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "reverse-dns-package",
+      "description": "Avoid reverse-DNS style package names",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "long-method",
+      "description": "Methods should stay under 50 lines",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "too-many-parameters",
+      "description": "Methods should take at most 5 parameters",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "deep-nesting",
+      "description": "Avoid deeply nested blocks (max 4)",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "high-complexity",
+      "description": "Methods should stay under cyclomatic complexity 10",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "many-returns",
+      "description": "Avoid methods with too many returns",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "else-if-chain",
+      "description": "Avoid long else-if chains",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "enhanced-for",
+      "description": "Use enhanced for-loops over index loops",
+      "filesChecked": 37,
+      "filesFailing": 3,
+      "violations": [
+        {
+          "path": "src/build/CoverageSummary.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/RedisShardedCluster.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/ports/PredefinedPortProviderTest.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "inner-class-depth",
+      "description": "Avoid deeply nested classes",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "large-class",
+      "description": "Classes should stay under 40 methods+fields",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "too-many-public-methods",
+      "description": "Classes should have at most 10 public methods",
+      "filesChecked": 37,
+      "filesFailing": 6,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/core/ExecutableProvider.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisClusterBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisSentinelBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisServerBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisClusterTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisServerTest.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "public-mutable-field",
+      "description": "Avoid public non-final fields",
+      "filesChecked": 37,
+      "filesFailing": 3,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/model/OsArchitecture.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/model/ReplicationGroup.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/model/Shard.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "mutable-static",
+      "description": "Avoid non-final static fields",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "missing-equals-hashcode",
+      "description": "Override equals and hashCode together",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "getters-setters",
+      "description": "Avoid getters and setters (expose behavior, not state)",
+      "filesChecked": 37,
+      "filesFailing": 5,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/RedisShardedCluster.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/ExecutableProvider.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/PortProvider.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/util/IOSupplier.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisClusterTest.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "boolean-parameter",
+      "description": "Avoid boolean parameters",
+      "filesChecked": 37,
+      "filesFailing": 3,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/core/RedisSentinelBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisServerBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisClusterTest.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "string-equality",
+      "description": "Compare Strings with .equals, not \u003d\u003d",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "space-indent",
+      "description": "Indent with an even number of spaces",
+      "filesChecked": 37,
+      "filesFailing": 5,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/RedisSentinel.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/RedisServer.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/ExecutableProvider.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisServerTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisShardedClusterTest.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "license-header",
+      "description": "Avoid license boilerplate at the top of files",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "final-parameters",
+      "description": "Method parameters should be declared final",
+      "filesChecked": 37,
+      "filesFailing": 1,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/core/RedisClusterBuilder.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "magic-number",
+      "description": "Avoid magic numbers",
+      "filesChecked": 37,
+      "filesFailing": 7,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/RedisInstance.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/RedisShardedCluster.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/PortProvider.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisClusterBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisSentinelBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisShardedClusterBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/model/OsArchitecture.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "deprecated-api",
+      "description": "Avoid deprecated constructors/APIs",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "suppress-warnings",
+      "description": "Avoid @SuppressWarnings",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "missing-javadoc",
+      "description": "Public classes/methods should have Javadoc",
+      "filesChecked": 37,
+      "filesFailing": 37,
+      "violations": [
+        {
+          "path": "src/build/CoverageSummary.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/Redis.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/RedisCluster.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/RedisInstance.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/RedisSentinel.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/RedisServer.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/RedisShardedCluster.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/ExecutableProvider.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/PortProvider.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisClusterBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisSentinelBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisServerBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisShardedClusterBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/error/OsArchitectureNotFound.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/error/RedisClusterSetupException.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/error/UnknownOSName.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/model/Architecture.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/model/OS.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/model/OsArchitecture.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/model/ReplicationGroup.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/model/Shard.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/util/CheckedRunnable.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/util/IO.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/util/IOSupplier.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/architecture/TestArchitecture.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisClusterTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisSentinelTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisServerClusterTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisServerTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisShardedClusterTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/SpringDataConnectivityTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/ports/EphemeralPortProviderTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/ports/PredefinedPortProviderTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/ports/SequencePortProviderTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/util/Collections.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/util/JedisUtil.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/tools/DownloadUriTest.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "author-tag",
+      "description": "Avoid @author tags",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "private-field-javadoc",
+      "description": "Avoid Javadoc on private fields",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "empty-catch",
+      "description": "Avoid empty catch blocks",
+      "filesChecked": 37,
+      "filesFailing": 4,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/RedisInstance.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/ExecutableProvider.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/util/IO.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/util/JedisUtil.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "empty-finally",
+      "description": "Avoid empty finally blocks",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "empty-method",
+      "description": "Avoid empty method bodies",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "catch-general",
+      "description": "Avoid catching broad Exception/Throwable",
+      "filesChecked": 37,
+      "filesFailing": 4,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/RedisShardedCluster.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisSentinelBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/util/IO.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/util/JedisUtil.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "return-null",
+      "description": "Avoid returning null",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "switch-fallthrough",
+      "description": "Avoid switch case fall-through",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "switch-default",
+      "description": "Switch statements should have a default",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "optional-get",
+      "description": "Avoid Optional.get() without isPresent()",
+      "filesChecked": 37,
+      "filesFailing": 1,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/util/IO.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "raw-types",
+      "description": "Avoid raw generic types",
+      "filesChecked": 37,
+      "filesFailing": 14,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/RedisCluster.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/RedisShardedCluster.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/ExecutableProvider.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisClusterBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisSentinelBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisServerBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/core/RedisShardedClusterBuilder.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/model/ReplicationGroup.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/model/Shard.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisClusterTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisServerTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/ports/EphemeralPortProviderTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/util/Collections.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/util/JedisUtil.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "print-stack-trace",
+      "description": "Avoid printStackTrace()",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "system-out",
+      "description": "Avoid System.out/err (use a logger)",
+      "filesChecked": 37,
+      "filesFailing": 1,
+      "violations": [
+        {
+          "path": "src/build/CoverageSummary.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "commented-out-code",
+      "description": "Avoid commented-out code",
+      "filesChecked": 37,
+      "filesFailing": 5,
+      "violations": [
+        {
+          "path": "src/main/java/redis/embedded/RedisInstance.java",
+          "line": -1
+        },
+        {
+          "path": "src/main/java/redis/embedded/RedisShardedCluster.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisClusterTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisSentinelTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/util/JedisUtil.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "todo-fixme",
+      "description": "No leftover TODO/FIXME/XXX markers",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "hardcoded-secret",
+      "description": "Avoid hardcoded secrets/credentials",
+      "filesChecked": 37,
+      "filesFailing": 1,
+      "violations": [
+        {
+          "path": "src/test/java/redis/embedded/RedisClusterTest.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "weak-hash",
+      "description": "Avoid weak hash algorithms (MD5/SHA1)",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "sql-concat",
+      "description": "Avoid SQL string concatenation",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "test-no-assertions",
+      "description": "Test methods should contain assertions",
+      "filesChecked": 37,
+      "filesFailing": 3,
+      "violations": [
+        {
+          "path": "src/test/java/redis/embedded/RedisClusterTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisSentinelTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/RedisServerTest.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "thread-sleep-test",
+      "description": "Avoid Thread.sleep in tests",
+      "filesChecked": 37,
+      "filesFailing": 2,
+      "violations": [
+        {
+          "path": "src/test/java/redis/embedded/RedisServerTest.java",
+          "line": -1
+        },
+        {
+          "path": "src/test/java/redis/embedded/util/JedisUtil.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "ignored-test",
+      "description": "Avoid @Ignore/@Disabled tests",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "empty-test",
+      "description": "Avoid empty test methods",
+      "filesChecked": 37,
+      "filesFailing": 0,
+      "violations": []
+    },
+    {
+      "id": "unused-private",
+      "description": "Remove unused private fields/methods",
+      "filesChecked": 37,
+      "filesFailing": 1,
+      "violations": [
+        {
+          "path": "src/test/java/architecture/TestArchitecture.java",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "license",
+      "description": "Project must have a LICENSE file",
+      "filesChecked": 1,
+      "filesFailing": 1,
+      "violations": []
+    },
+    {
+      "id": "readme",
+      "description": "Project must have a README file",
+      "filesChecked": 1,
+      "filesFailing": 1,
+      "violations": []
+    },
+    {
+      "id": "build-file",
+      "description": "Project must have a build file (pom.xml or Gradle)",
+      "filesChecked": 1,
+      "filesFailing": 1,
+      "violations": []
+    },
+    {
+      "id": "too-many-deps",
+      "description": "Keep dependencies under 20",
+      "filesChecked": 1,
+      "filesFailing": 1,
+      "violations": []
+    },
+    {
+      "id": "snapshot-deps",
+      "description": "Avoid -SNAPSHOT/dynamic dependency versions",
+      "filesChecked": 1,
+      "filesFailing": 1,
+      "violations": []
+    },
+    {
+      "id": "missing-dep-version",
+      "description": "Every dependency should declare a version",
+      "filesChecked": 1,
+      "filesFailing": 1,
+      "violations": []
+    },
+    {
+      "id": "library-no-deps",
+      "description": "Libraries should have zero non-test dependencies (plugins exempt)",
+      "filesChecked": 1,
+      "filesFailing": 1,
+      "violations": []
+    },
+    {
+      "id": "single-class-package",
+      "description": "Packages should contain more than one file",
+      "filesChecked": 1,
+      "filesFailing": 1,
+      "violations": [
+        {
+          "path": "/home/jurgen/projects/libraries/embedded-redis",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "mixed-package",
+      "description": "A package should hold either files or sub-packages, not both",
+      "filesChecked": 1,
+      "filesFailing": 1,
+      "violations": [
+        {
+          "path": "/home/jurgen/projects/libraries/embedded-redis",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "package-too-large",
+      "description": "Keep packages under 30 classes",
+      "filesChecked": 1,
+      "filesFailing": 1,
+      "violations": []
+    },
+    {
+      "id": "circular-packages",
+      "description": "Avoid circular package dependencies",
+      "filesChecked": 1,
+      "filesFailing": 1,
+      "violations": [
+        {
+          "path": "/home/jurgen/projects/libraries/embedded-redis",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "long-inheritance",
+      "description": "Avoid inheritance chains deeper than 3",
+      "filesChecked": 1,
+      "filesFailing": 1,
+      "violations": []
+    },
+    {
+      "id": "no-tests",
+      "description": "Project should include tests",
+      "filesChecked": 1,
+      "filesFailing": 1,
+      "violations": []
+    },
+    {
+      "id": "test-ratio",
+      "description": "Keep a reasonable test-to-source ratio",
+      "filesChecked": 1,
+      "filesFailing": 1,
+      "violations": []
+    },
+    {
+      "id": "untested-classes",
+      "description": "Every main class should have a test",
+      "filesChecked": 1,
+      "filesFailing": 1,
+      "violations": [
+        {
+          "path": "/home/jurgen/projects/libraries/embedded-redis",
+          "line": -1
+        }
+      ]
+    },
+    {
+      "id": "duplicated-code",
+      "description": "Avoid duplicated code blocks across files",
+      "filesChecked": 1,
+      "filesFailing": 1,
+      "violations": [
+        {
+          "path": "/home/jurgen/projects/libraries/embedded-redis",
+          "line": -1
+        }
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "id": "loc",
+      "description": "Total physical lines",
+      "value": 2925
+    },
+    {
+      "id": "sloc",
+      "description": "Source lines, excluding blanks and comments",
+      "value": 2278
+    },
+    {
+      "id": "max-file-length",
+      "description": "Longest file, in lines",
+      "value": 300
+    },
+    {
+      "id": "cyclomatic-total",
+      "description": "Sum of cyclomatic complexity over all methods",
+      "value": 388
+    },
+    {
+      "id": "cyclomatic-mean",
+      "description": "Mean cyclomatic complexity per method",
+      "value": 1.7244444444444444
+    },
+    {
+      "id": "cyclomatic-max",
+      "description": "Highest cyclomatic complexity of any method",
+      "value": 7
+    },
+    {
+      "id": "max-nesting",
+      "description": "Deepest control-flow nesting, in blocks",
+      "value": 4
+    },
+    {
+      "id": "halstead-volume",
+      "description": "Halstead volume of the whole codebase",
+      "value": 43885.361339309384
+    },
+    {
+      "id": "comment-ratio",
+      "description": "Comment lines, percent of all lines",
+      "value": 3.8974358974358974
+    },
+    {
+      "id": "javadoc-coverage",
+      "description": "Public types and methods with Javadoc, percent",
+      "value": 1.8957345971563981
+    },
+    {
+      "id": "parse-failure-rate",
+      "description": "Files that failed to parse, percent",
+      "value": 0
+    },
+    {
+      "id": "maintainability-index",
+      "description": "Maintainability index, 0-100",
+      "value": 83.02224180025259
+    },
+    {
+      "id": "package-instability",
+      "description": "Mean package instability Ce/(Ca+Ce), percent",
+      "value": 58.73015873015872
+    },
+    {
+      "id": "commits",
+      "description": "Commits in history",
+      "value": 287
+    },
+    {
+      "id": "churn",
+      "description": "Lines added and deleted across history",
+      "value": 13660
+    },
+    {
+      "id": "hotspot-index",
+      "description": "Highest churn times complexity of any file",
+      "value": 28217
+    }
+  ],
+  "categories": [
+    {
+      "name": "documentation",
+      "score": 66.7
+    },
+    {
+      "name": "coverage",
+      "score": 73.1
+    },
+    {
+      "name": "imports",
+      "score": 81.1
+    },
+    {
+      "name": "structure",
+      "score": 82.2
+    },
+    {
+      "name": "format",
+      "score": 93.1
+    },
+    {
+      "name": "control flow",
+      "score": 93.1
+    },
+    {
+      "name": "style",
+      "score": 94.1
+    },
+    {
+      "name": "design",
+      "score": 94.3
+    },
+    {
+      "name": "naming",
+      "score": 94.9
+    },
+    {
+      "name": "duplication",
+      "score": 95.7
+    },
+    {
+      "name": "noise",
+      "score": 95.9
+    },
+    {
+      "name": "tests",
+      "score": 96.6
+    },
+    {
+      "name": "dead code",
+      "score": 97.3
+    },
+    {
+      "name": "complexity",
+      "score": 99.0
+    },
+    {
+      "name": "security",
+      "score": 99.1
+    },
+    {
+      "name": "dependencies",
+      "score": 100.0
+    },
+    {
+      "name": "project",
+      "score": 100.0
+    },
+    {
+      "name": "library",
+      "score": 100.0
+    }
+  ]
+}

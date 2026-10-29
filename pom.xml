@@ -19,6 +19,13 @@
         </license>
     </licenses>
 
+    <scm>
+        <connection>scm:git:https://github.com/codemonstur/embedded-redis.git</connection>
+        <developerConnection>scm:git:https://github.com/codemonstur/embedded-redis.git</developerConnection>
+        <url>https://github.com/codemonstur/embedded-redis</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <developers>
         <developer>
             <id>codemonstur</id>
@@ -26,13 +33,6 @@
             <email>jegvoorneveld@gmail.com</email>
         </developer>
     </developers>
-
-    <scm>
-        <connection>scm:git:https://github.com/codemonstur/embedded-redis.git</connection>
-        <developerConnection>scm:git:https://github.com/codemonstur/embedded-redis.git</developerConnection>
-        <url>https://github.com/codemonstur/embedded-redis</url>
-        <tag>HEAD</tag>
-    </scm>
 
     <properties>
         <module.name>com.github.codemonstur.redis.embedded</module.name>
@@ -47,8 +47,8 @@
         <version.library.slf4j>1.7.36</version.library.slf4j>
         <version.library.spring-data-redis>2.7.18</version.library.spring-data-redis>
 
-        <version.plugin.check-cves>1.1.0</version.plugin.check-cves>
-        <version.plugin.check-license>1.4.0</version.plugin.check-license>
+        <version.plugin.check-cves>1.2.0</version.plugin.check-cves>
+        <version.plugin.check-license>1.5.0</version.plugin.check-license>
         <version.plugin.codegrade>0.2.0</version.plugin.codegrade>
         <version.plugin.compiler>3.16.0</version.plugin.compiler>
         <version.plugin.enforcer>3.6.3</version.plugin.enforcer>
@@ -57,7 +57,10 @@
         <version.plugin.javadoc>3.12.0</version.plugin.javadoc>
         <version.plugin.publish>0.12.0</version.plugin.publish>
         <version.plugin.source>3.4.0</version.plugin.source>
-    </properties>
+            <version.library.archunit>1.5.1</version.library.archunit>
+            <version.library.pitest-junit5>1.2.3</version.library.pitest-junit5>
+        <version.plugin.pitest>1.30.1</version.plugin.pitest>
+</properties>
 
     <dependencies>
 
@@ -92,6 +95,13 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-nop</artifactId>
             <version>${version.library.slf4j}</version>
+            <scope>test</scope>
+        </dependency>
+
+            <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit6</artifactId>
+            <version>${version.library.archunit}</version>
             <scope>test</scope>
         </dependency>
 
@@ -225,19 +235,11 @@
                         <configuration>
                             <includeTestDependencies>true</includeTestDependencies>
                             <rules>
-                                <rule>url:equal:http://www.opensource.org/licenses/bsd-license.php</rule>
-                                <rule>url:equal:http://opensource.org/licenses/BSD-3-Clause</rule>
-                                <rule>url:regex:(http|https)://(www.)?opensource.org/licenses/(MIT|mit-license.php)</rule>
-                                <rule>name:equal:The MIT License</rule>
-                                <rule>name:equal:MIT</rule>
-                                <rule>url:equal:https://opensource.org/license/mit</rule>
-                                <rule>name:regex:(The )?Apache(\s|-)(Software )?(License |License, )?(Version |version )?2\.0</rule>
-                                <rule>url:equal:http://www.eclipse.org/legal/epl-v10.html</rule>
-                                <rule>name:equal:Eclipse Public License 1.0</rule>
-                                <rule>url:equal:http://www.eclipse.org/org/documents/edl-v10.php</rule>
-                                <rule>url:equal:http://www.mozilla.org/MPL/2.0/</rule>
-                                <rule>url:equal:https://www.eclipse.org/legal/epl-v20.html</rule>
+                                <rule>name:regex:.*Apache.*</rule>
+                                <rule>name:regex:.*MIT.*</rule>
+                                <rule>name:regex:.*Eclipse.*</rule>
                             </rules>
+                        
                         </configuration>
                     </plugin>
 
@@ -291,6 +293,38 @@
                 </plugins>
             </build>
         </profile>
-    </profiles>
+            <profile>
+            <id>mutation</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <version>${version.plugin.pitest}</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.pitest</groupId>
+                                <artifactId>pitest-junit5-plugin</artifactId>
+                                <version>${version.library.pitest-junit5}</version>
+                            </dependency>
+                        </dependencies>
+                        <executions>
+                            <execution>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>mutationCoverage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+</profiles>
 
 </project>
