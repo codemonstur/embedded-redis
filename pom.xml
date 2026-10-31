@@ -41,10 +41,10 @@
         <maven.compiler.release>8</maven.compiler.release>
         <maven.version>[3.6.3,)</maven.version>
 
-        <version.library.jedis>3.8.0</version.library.jedis>
+        <version.library.jedis>8.0.2</version.library.jedis>
         <version.library.junit>6.1.3</version.library.junit>
-        <version.library.mockito>5.23.0</version.library.mockito>
-        <version.library.slf4j>1.7.36</version.library.slf4j>
+        <version.library.mockito>5.24.0</version.library.mockito>
+        <version.library.slf4j>2.0.20</version.library.slf4j>
         <version.library.spring-data-redis>2.7.18</version.library.spring-data-redis>
 
         <version.plugin.check-cves>1.2.0</version.plugin.check-cves>
@@ -60,7 +60,11 @@
             <version.library.archunit>1.5.1</version.library.archunit>
             <version.library.pitest-junit5>1.2.3</version.library.pitest-junit5>
         <version.plugin.pitest>1.30.1</version.plugin.pitest>
-</properties>
+        <!-- default for @{argLine}; jacoco's prepare-agent appends the agent when it runs -->
+        <argLine></argLine>
+            <version.plugin.jacoco>0.8.15</version.plugin.jacoco>
+            <version.plugin.surefire>3.6.0</version.plugin.surefire>
+    </properties>
 
     <dependencies>
 
@@ -109,6 +113,32 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${version.plugin.surefire}</version>
+                <configuration>
+                    <argLine>@{argLine} -Xshare:off</argLine>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${version.plugin.jacoco}</version>
+                <executions>
+                    <execution>
+                        <id>pre-unit-test</id>
+                        <goals><goal>prepare-agent</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>post-unit-test</id>
+                        <phase>test</phase>
+                        <goals><goal>report</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
