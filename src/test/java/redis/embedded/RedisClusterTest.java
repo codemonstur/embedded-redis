@@ -10,8 +10,6 @@ import redis.embedded.core.RedisSentinelBuilder;
 import redis.embedded.util.JedisUtil;
 
 import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,7 +25,6 @@ public class RedisClusterTest {
     private static final String MASTER_NAME = "ourmaster";
 
     private final RedisSentinelBuilder sentinelBuilder = RedisSentinel.newRedisSentinel();
-    private String bindAddress;
 
     private FakeRedis sentinel1;
     private FakeRedis sentinel2;
@@ -37,18 +34,11 @@ public class RedisClusterTest {
     private RedisCluster instance;
 
     @BeforeEach
-    public void setUp() throws UnknownHostException {
+    public void setUp() {
         sentinel1 = new FakeRedis();
         sentinel2 = new FakeRedis();
         master1 = new FakeRedis();
         master2 = new FakeRedis();
-
-        // Jedis translates ”localhost” to getLocalHost().getHostAddress() (see Jedis HostAndPort#getLocalHostQuietly),
-        // which can vary from 127.0.0.1 (most notably, Debian/Ubuntu return 127.0.1.1)
-        if (bindAddress == null) {
-            bindAddress = Inet4Address.getLocalHost().getHostAddress();
-            sentinelBuilder.bind(bindAddress);
-        }
     }
 
     @AfterEach
@@ -168,7 +158,7 @@ public class RedisClusterTest {
         final int sentinelPort = cluster.sentinelPorts().get(0);
         try {
             cluster.start();
-            try (final Jedis sentinel = new Jedis(bindAddress, sentinelPort)) {
+            try (final Jedis sentinel = new Jedis("localhost", sentinelPort)) {
                 try {
                     sentinel.ping();
                     fail("Sentinel should require the configured password");

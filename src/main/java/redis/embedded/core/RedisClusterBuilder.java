@@ -13,6 +13,9 @@ import java.util.List;
 
 import static redis.embedded.core.PortProvider.*;
 
+/**
+ * The {@code RedisClusterBuilder} class.
+ */
 public final class RedisClusterBuilder {
 
     private RedisSentinelBuilder sentinelBuilder = new RedisSentinelBuilder();
@@ -23,63 +26,133 @@ public final class RedisClusterBuilder {
     private PortProvider replicationGroupPortProvider = newSequencePortProvider(6379);
     private final List<ReplicationGroup> groups = new LinkedList<>();
 
+    /**
+     * Returns the result of {@code withSentinelBuilder}.
+     *
+     * @param sentinelBuilder the sentinel builder
+     * @return the result
+     */
     public RedisClusterBuilder withSentinelBuilder(final RedisSentinelBuilder sentinelBuilder) {
         this.sentinelBuilder = sentinelBuilder;
         return this;
     }
 
+    /**
+     * Returns the result of {@code withServerBuilder}.
+     *
+     * @param serverBuilder the server builder
+     * @return the result
+     */
     public RedisClusterBuilder withServerBuilder(final RedisServerBuilder serverBuilder) {
         this.serverBuilder = serverBuilder;
         return this;
     }
 
+    /**
+     * Returns the result of {@code sentinelPorts}.
+     *
+     * @param ports the ports
+     * @return the result
+     */
     public RedisClusterBuilder sentinelPorts(final Collection<Integer> ports) {
         this.sentinelPortProvider = newPredefinedPortProvider(ports);
         this.sentinelCount = ports.size();
         return this;
     }
 
+    /**
+     * Returns the result of {@code serverPorts}.
+     *
+     * @param ports the ports
+     * @return the result
+     */
     public RedisClusterBuilder serverPorts(final Collection<Integer> ports) {
         this.replicationGroupPortProvider = newPredefinedPortProvider(ports);
         return this;
     }
 
+    /**
+     * Returns the result of {@code ephemeralSentinels}.
+     *
+     * @return the result
+     */
     public RedisClusterBuilder ephemeralSentinels() {
         this.sentinelPortProvider = newEphemeralPortProvider();
         return this;
     }
 
+    /**
+     * Returns the result of {@code ephemeralServers}.
+     *
+     * @return the result
+     */
     public RedisClusterBuilder ephemeralServers() {
         this.replicationGroupPortProvider = newEphemeralPortProvider();
         return this;
     }
 
+    /**
+     * Returns the result of {@code ephemeral}.
+     *
+     * @return the result
+     */
     public RedisClusterBuilder ephemeral() {
         ephemeralSentinels();
         ephemeralServers();
         return this;
     }
 
+    /**
+     * Returns the result of {@code sentinelCount}.
+     *
+     * @param sentinelCount the sentinel count
+     * @return the result
+     */
     public RedisClusterBuilder sentinelCount(final int sentinelCount) {
         this.sentinelCount = sentinelCount;
         return this;
     }
 
+    /**
+     * Returns the result of {@code sentinelStartingPort}.
+     *
+     * @param startingPort the starting port
+     * @return the result
+     */
     public RedisClusterBuilder sentinelStartingPort(final int startingPort) {
         this.sentinelPortProvider = newSequencePortProvider(startingPort);
         return this;
     }
 
+    /**
+     * Returns the result of {@code quorumSize}.
+     *
+     * @param quorumSize the quorum size
+     * @return the result
+     */
     public RedisClusterBuilder quorumSize(final int quorumSize) {
         this.quorumSize = quorumSize;
         return this;
     }
 
+    /**
+     * Returns the result of {@code replicationGroup}.
+     *
+     * @param masterName the master name
+     * @param slaveCount the slave count
+     * @return the result
+     */
     public RedisClusterBuilder replicationGroup(final String masterName, final int slaveCount) {
         this.groups.add(new ReplicationGroup(masterName, slaveCount, replicationGroupPortProvider));
         return this;
     }
 
+    /**
+     * Returns the result of {@code build}.
+     *
+     * @return the result
+     * @throws IOException if the operation fails
+     */
     public RedisCluster build() throws IOException {
         final List<Redis> sentinels = buildSentinels();
         final List<Redis> servers = buildServers();
@@ -135,4 +208,10 @@ public final class RedisClusterBuilder {
         return sentinelPortProvider.get();
     }
 
+
+    /**
+     * Creates a new instance.
+     */
+    public RedisClusterBuilder() {
+    }
 }

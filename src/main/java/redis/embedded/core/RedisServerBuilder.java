@@ -16,6 +16,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static redis.embedded.Redis.DEFAULT_REDIS_PORT;
 import static redis.embedded.core.ExecutableProvider.newJarResourceProvider;
 
+/**
+ * The {@code RedisServerBuilder} class.
+ */
 public final class RedisServerBuilder {
 
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -33,34 +36,79 @@ public final class RedisServerBuilder {
     // one node's settings into the next node's config file
     private StringBuilder nodeSettings = new StringBuilder();
 
+    /**
+     * Returns the result of {@code executableProvider}.
+     *
+     * @param provider the provider
+     * @return the result
+     */
     public RedisServerBuilder executableProvider(final ExecutableProvider provider) {
         this.provider = provider;
         return this;
     }
 
+    /**
+     * Returns the result of {@code bind}.
+     *
+     * @param bind the bind
+     * @return the result
+     */
     public RedisServerBuilder bind(final String bind) {
         this.bindAddress = bind;
         return this;
     }
 
+    /**
+     * Returns the result of {@code port}.
+     *
+     * @param port the port
+     * @return the result
+     */
     public RedisServerBuilder port(final int port) {
         this.bindPort = port;
         return this;
     }
 
+    /**
+     * Returns the result of {@code slaveOf}.
+     *
+     * @param hostname the hostname
+     * @param port the port
+     * @return the result
+     */
     public RedisServerBuilder slaveOf(final String hostname, final int port) {
         this.slaveOf = new InetSocketAddress(hostname, port);
         return this;
     }
 
+    /**
+     * Returns the result of {@code slaveOf}.
+     *
+     * @param slaveOf the slave of
+     * @return the result
+     */
     public RedisServerBuilder slaveOf(final InetSocketAddress slaveOf) {
         this.slaveOf = slaveOf;
         return this;
     }
 
+    /**
+     * Returns the result of {@code configFile}.
+     *
+     * @param redisConf the redis conf
+     * @return the result
+     * @throws IOException if the operation fails
+     */
     public RedisServerBuilder configFile(final String redisConf) throws IOException {
         return configFile(Paths.get(redisConf));
     }
+    /**
+     * Returns the result of {@code configFile}.
+     *
+     * @param redisConf the redis conf
+     * @return the result
+     * @throws IOException if the operation fails
+     */
     public RedisServerBuilder configFile(final Path redisConf) throws IOException {
         try (final Stream<String> lines = Files.lines(redisConf)) {
             lines.forEach(line -> redisConfigBuilder.append(line).append(LINE_SEPARATOR));
@@ -68,11 +116,24 @@ public final class RedisServerBuilder {
         return this;
     }
 
+    /**
+     * Returns the result of {@code settingIf}.
+     *
+     * @param shouldSet the new value
+     * @param configLine the new value
+     * @return the result
+     */
     public RedisServerBuilder settingIf(final boolean shouldSet, final String configLine) {
         if (shouldSet) setting(configLine);
         return this;
     }
 
+    /**
+     * Sets the ting.
+     *
+     * @param configLine the new value
+     * @return the result
+     */
     public RedisServerBuilder setting(final String configLine) {
         redisConfigBuilder.append(configLine).append(LINE_SEPARATOR);
         return this;
@@ -80,34 +141,73 @@ public final class RedisServerBuilder {
 
     // Unlike setting(), the line only applies to the next-built server: dropped again by reset(), so builders
     // shared between the nodes of a cluster don't carry the settings of one node into the next one
+    /**
+     * Sets the ting for next build.
+     *
+     * @param configLine the new value
+     * @return the result
+     */
     public RedisServerBuilder settingForNextBuild(final String configLine) {
         nodeSettings.append(configLine).append(LINE_SEPARATOR);
         return this;
     }
 
+    /**
+     * Returns the result of {@code onShutdownForceStop}.
+     *
+     * @param forceStop the force stop
+     * @return the result
+     */
     public RedisServerBuilder onShutdownForceStop(final boolean forceStop) {
         this.forceStop = forceStop;
         return this;
     }
 
+    /**
+     * Returns the result of {@code soutListener}.
+     *
+     * @param soutListener the sout listener
+     * @return the result
+     */
     public RedisServerBuilder soutListener(final Consumer<String> soutListener) {
         this.soutListener = soutListener;
         return this;
     }
+    /**
+     * Returns the result of {@code serrListener}.
+     *
+     * @param serrListener the serr listener
+     * @return the result
+     */
     public RedisServerBuilder serrListener(final Consumer<String> serrListener) {
         this.serrListener = serrListener;
         return this;
     }
 
+    /**
+     * Returns the result of {@code build}.
+     *
+     * @return the result
+     * @throws IOException if the operation fails
+     */
     public RedisServer build() throws IOException {
         return new RedisServer(bindPort, buildCommandArgs(), forceStop, soutListener, serrListener);
     }
 
+    /**
+     * Performs the {@code reset} operation.
+     */
     public void reset() {
         this.slaveOf = null;
         this.nodeSettings.setLength(0);
     }
 
+    /**
+     * Returns the result of {@code buildCommandArgs}.
+     *
+     * @return the result
+     * @throws IOException if the operation fails
+     */
     public List<String> buildCommandArgs() throws IOException {
         // Composed fresh on every build and without mutating this builder: the bind line goes first so that
         // an explicit bind from setting()/settingForNextBuild()/configFile() can override the default
@@ -141,4 +241,10 @@ public final class RedisServerBuilder {
         return redisConfigFile;
     }
 
+
+    /**
+     * Creates a new instance.
+     */
+    public RedisServerBuilder() {
+    }
 }

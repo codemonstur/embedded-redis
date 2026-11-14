@@ -12,8 +12,22 @@ report="src/docs/quality/codegrade-${timestamp}.json"
 
 mkdir -p src/docs/quality
 
-mvn -q -N com.github.codemonstur:codegrade-maven-plugin:0.2.0:check \
-  -Dcodegrade.format=JSON \
-  -Dcodegrade.outputFile="$report"
+codegrade() {
+  mvn -q -N com.github.codemonstur:codegrade-maven-plugin:0.2.0:check \
+    -Dcodegrade.format=JSON \
+    -Dcodegrade.outputFile="$report"
+}
+
+# The 0.2.0 maven plugin can fail to resolve when the codegrade parent pom has
+# moved on. The cli is a self contained jar, so use it as a fallback.
+if ! codegrade >/dev/null 2>&1; then
+  repo=$(mvn -q -N help:evaluate -Dexpression=settings.localRepository -DforceStdout)
+  cli="${repo}/com/github/codemonstur/codegrade-cli/0.2.0/codegrade-cli-0.2.0.jar"
+  if [ ! -f "$cli" ]; then
+    printf 'warning: codegrade is unavailable, skipping the quality report\n' >&2
+    exit 0
+  fi
+  java -jar "$cli" -f JSON -o "$report" "$(pwd)"
+fi
 
 git add "$report"

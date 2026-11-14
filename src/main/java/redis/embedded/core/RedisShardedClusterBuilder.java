@@ -11,6 +11,9 @@ import java.util.*;
 
 import static redis.embedded.core.PortProvider.*;
 
+/**
+ * The {@code RedisShardedClusterBuilder} class.
+ */
 public final class RedisShardedClusterBuilder {
 
     private static final Duration DEFAULT_INITIALIZATION_TIMEOUT = Duration.ofSeconds(20);
@@ -21,35 +24,76 @@ public final class RedisShardedClusterBuilder {
     private final List<Shard> shards = new LinkedList<>();
     private final Map<Integer, Set<Integer>> replicasPortsByMainNodePort = new LinkedHashMap<>();
 
+    /**
+     * Returns the result of {@code withServerBuilder}.
+     *
+     * @param serverBuilder the server builder
+     * @return the result
+     */
     public RedisShardedClusterBuilder withServerBuilder(final RedisServerBuilder serverBuilder) {
         this.serverBuilder = serverBuilder;
         return this;
     }
 
+    /**
+     * Returns the result of {@code serverPorts}.
+     *
+     * @param ports the ports
+     * @return the result
+     */
     public RedisShardedClusterBuilder serverPorts(final Collection<Integer> ports) {
         this.shardPortProvider = newPredefinedPortProvider(ports);
         return this;
     }
 
+    /**
+     * Returns the result of {@code initializationTimeout}.
+     *
+     * @param initializationTimeout the initialization timeout
+     * @return the result
+     */
     public RedisShardedClusterBuilder initializationTimeout(final Duration initializationTimeout) {
         this.initializationTimeout = initializationTimeout;
         return this;
     }
 
+    /**
+     * Returns the result of {@code ephemeralServers}.
+     *
+     * @return the result
+     */
     public RedisShardedClusterBuilder ephemeralServers() {
         this.shardPortProvider = newEphemeralPortProviderInRedisClusterRange();
         return this;
     }
 
+    /**
+     * Returns the result of {@code ephemeral}.
+     *
+     * @return the result
+     */
     public RedisShardedClusterBuilder ephemeral() {
         ephemeralServers();
         return this;
     }
+    /**
+     * Returns the result of {@code shard}.
+     *
+     * @param name the name
+     * @param replicaCount the replica count
+     * @return the result
+     */
     public RedisShardedClusterBuilder shard(final String name, final int replicaCount) {
         this.shards.add(new Shard(name, replicaCount, this.shardPortProvider));
         return this;
     }
 
+    /**
+     * Returns the result of {@code build}.
+     *
+     * @return the result
+     * @throws IOException if the operation fails
+     */
     public RedisShardedCluster build() throws IOException {
         final List<Redis> servers = buildServers();
         return new RedisShardedCluster(servers, replicasPortsByMainNodePort, initializationTimeout);
@@ -91,4 +135,10 @@ public final class RedisShardedClusterBuilder {
         return serverBuilder.port(shard.mainNodePort).build();
     }
 
+
+    /**
+     * Creates a new instance.
+     */
+    public RedisShardedClusterBuilder() {
+    }
 }

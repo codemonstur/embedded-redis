@@ -12,6 +12,9 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
+/**
+ * The {@code RedisShardedCluster} class.
+ */
 public final class RedisShardedCluster implements Redis {
 
     private static final String CLUSTER_IP = "127.0.0.1";
@@ -24,6 +27,13 @@ public final class RedisShardedCluster implements Redis {
     private final Map<Integer, String> mainNodeIdsByPort = new LinkedHashMap<>();
     private final Duration initializationTimeout;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param servers the servers
+     * @param replicasPortsByMainNodePort the replicas ports by main node port
+     * @param initializationTimeout the initialization timeout
+     */
     public RedisShardedCluster(
             final List<Redis> servers,
             final Map<Integer, Set<Integer>> replicasPortsByMainNodePort,
@@ -33,8 +43,18 @@ public final class RedisShardedCluster implements Redis {
         this.initializationTimeout = initializationTimeout;
     }
 
+    /**
+     * Returns the result of {@code newRedisCluster}.
+     *
+     * @return the result
+     */
     public static RedisShardedClusterBuilder newRedisCluster() { return new RedisShardedClusterBuilder(); }
 
+    /**
+     * Returns whether the active condition holds.
+     *
+     * @return whether the condition holds
+     */
     @Override
     public boolean isActive() {
         for (final Redis redis : servers) {
@@ -45,6 +65,11 @@ public final class RedisShardedCluster implements Redis {
         return true;
     }
 
+    /**
+     * Performs the {@code start} operation.
+     *
+     * @throws IOException if the operation fails
+     */
     @Override
     public void start() throws IOException {
         if (replicasPortsByMainNodePort.isEmpty())
@@ -69,6 +94,11 @@ public final class RedisShardedCluster implements Redis {
         linkReplicasAndShards();
     }
 
+    /**
+     * Performs the {@code stop} operation.
+     *
+     * @throws IOException if the operation fails
+     */
     @Override
     public void stop() throws IOException {
         stopAll(servers);
@@ -88,11 +118,26 @@ public final class RedisShardedCluster implements Redis {
         if (failure != null) throw failure;
     }
 
+    /**
+     * Returns the result of {@code ports}.
+     *
+     * @return the result
+     */
     @Override
     public List<Integer> ports() { return new ArrayList<>(serverPorts()); }
 
+    /**
+     * Returns the result of {@code servers}.
+     *
+     * @return the result
+     */
     public List<Redis> servers() { return new LinkedList<>(servers); }
 
+    /**
+     * Returns the result of {@code serverPorts}.
+     *
+     * @return the result
+     */
     public List<Integer> serverPorts() {
         final List<Integer> ports = new ArrayList<>();
         for (final Redis redis : servers) {
@@ -101,6 +146,11 @@ public final class RedisShardedCluster implements Redis {
         return ports;
     }
 
+    /**
+     * Returns the port.
+     *
+     * @return the result
+     */
     public int getPort() { return this.ports().get(0); }
 
     private void linkReplicasAndShards() {

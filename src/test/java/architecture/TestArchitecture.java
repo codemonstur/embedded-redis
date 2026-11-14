@@ -7,7 +7,7 @@ import com.tngtech.archunit.lang.ArchRule;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.*;
 import static com.tngtech.archunit.library.GeneralCodingRules.*;
 
-@AnalyzeClasses(packages = { "redis" })
+@AnalyzeClasses(packages = { "redis.embedded" })
 public class TestArchitecture {
 
     @ArchTest

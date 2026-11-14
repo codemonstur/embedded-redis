@@ -7,16 +7,30 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * The {@code RedisCluster} class.
+ */
 public final class RedisCluster implements Redis {
 
     private final List<Redis> sentinels = new LinkedList<>();
     private final List<Redis> servers = new LinkedList<>();
 
+    /**
+     * Creates a new instance.
+     *
+     * @param sentinels the sentinels
+     * @param servers the servers
+     */
     public RedisCluster(final List<Redis> sentinels, final List<Redis> servers) {
         this.servers.addAll(servers);
         this.sentinels.addAll(sentinels);
     }
 
+    /**
+     * Returns whether the active condition holds.
+     *
+     * @return whether the condition holds
+     */
     @Override
     public boolean isActive() {
         for (final Redis redis : sentinels) {
@@ -32,6 +46,11 @@ public final class RedisCluster implements Redis {
         return true;
     }
 
+    /**
+     * Performs the {@code start} operation.
+     *
+     * @throws IOException if the operation fails
+     */
     @Override
     public void start() throws IOException {
         final List<Redis> started = new ArrayList<>();
@@ -55,6 +74,11 @@ public final class RedisCluster implements Redis {
         }
     }
 
+    /**
+     * Performs the {@code stop} operation.
+     *
+     * @throws IOException if the operation fails
+     */
     @Override
     public void stop() throws IOException {
         final List<Redis> all = new ArrayList<>(sentinels);
@@ -76,6 +100,11 @@ public final class RedisCluster implements Redis {
         if (failure != null) throw failure;
     }
 
+    /**
+     * Returns the result of {@code ports}.
+     *
+     * @return the result
+     */
     @Override
     public List<Integer> ports() {
         final List<Integer> ports = new ArrayList<>();
@@ -84,10 +113,20 @@ public final class RedisCluster implements Redis {
         return ports;
     }
 
+    /**
+     * Returns the result of {@code sentinels}.
+     *
+     * @return the result
+     */
     public List<Redis> sentinels() {
         return new LinkedList<>(sentinels);
     }
 
+    /**
+     * Returns the result of {@code sentinelPorts}.
+     *
+     * @return the result
+     */
     public List<Integer> sentinelPorts() {
         final List<Integer> ports = new ArrayList<>();
         for (final Redis redis : sentinels) {
@@ -96,10 +135,20 @@ public final class RedisCluster implements Redis {
         return ports;
     }
 
+    /**
+     * Returns the result of {@code servers}.
+     *
+     * @return the result
+     */
     public List<Redis> servers() {
         return new LinkedList<>(servers);
     }
 
+    /**
+     * Returns the result of {@code serverPorts}.
+     *
+     * @return the result
+     */
     public List<Integer> serverPorts() {
         final List<Integer> ports = new ArrayList<>();
         for (final Redis redis : servers) {
@@ -108,6 +157,11 @@ public final class RedisCluster implements Redis {
         return ports;
     }
 
+    /**
+     * Returns the result of {@code newRedisCluster}.
+     *
+     * @return the result
+     */
     public static RedisClusterBuilder newRedisCluster() {
         return new RedisClusterBuilder();
     }

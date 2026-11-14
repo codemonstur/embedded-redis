@@ -10,8 +10,6 @@ import redis.embedded.Redis;
 import redis.embedded.RedisCluster;
 import redis.embedded.core.PortProvider;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -71,8 +69,7 @@ public enum JedisUtil {;
         while (System.currentTimeMillis() < deadline) {
             for (final String sentinel : sentinelHosts) {
                 final String[] hostAndPort = sentinel.split(":");
-                final String host = resolveLikeJedis(hostAndPort[0]);
-                try (final Jedis jedis = new Jedis(host, Integer.parseInt(hostAndPort[1]), TIMEOUT_MS)) {
+                try (final Jedis jedis = new Jedis(hostAndPort[0], Integer.parseInt(hostAndPort[1]), TIMEOUT_MS)) {
                     final List<String> master = jedis.sentinelGetMasterAddrByName(masterName);
                     if (master != null && !master.isEmpty()) return;
                 } catch (final RuntimeException ignored) {
@@ -83,24 +80,6 @@ public enum JedisUtil {;
         }
         throw new AssertionError("Sentinels did not discover master '" + masterName + "' within "
             + READY_TIMEOUT_MS + " ms. Sentinels contacted: " + sentinelHosts);
-    }
-
-    /**
-     * Mirrors Jedis' HostAndPort#convertHost: a loopback hostname resolves to 127.0.0.1, but the services under
-     * test bind to getLocalHost() (on Debian/Ubuntu /etc/hosts the hostname maps to 127.0.1.1), and Jedis'
-     * sentinel pool translates any loopback address to getLocalHost(). Connecting raw to "localhost" would
-     * therefore target an address the sentinel does not listen on.
-     */
-    private static String resolveLikeJedis(final String host) {
-        try {
-            final InetAddress address = InetAddress.getByName(host);
-            if (address.isLoopbackAddress() || "0.0.0.0".equals(host) || host.startsWith("169.254")) {
-                return InetAddress.getLocalHost().getHostAddress();
-            }
-        } catch (final UnknownHostException ignored) {
-            // Fall through and use the host as-is
-        }
-        return host;
     }
 
     private static void sleep(final long millis) {

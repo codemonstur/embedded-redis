@@ -12,6 +12,9 @@ import java.util.regex.Pattern;
 
 import static redis.embedded.util.IO.*;
 
+/**
+ * The {@code RedisInstance} class.
+ */
 public abstract class RedisInstance implements Redis {
 
     // A binary that never signals readiness (missing libraries, wrong architecture, ...) would otherwise block
@@ -32,6 +35,16 @@ public abstract class RedisInstance implements Redis {
     private Process process;
     private Thread shutdownHook;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param port the port
+     * @param args the command-line arguments
+     * @param readyPattern the ready pattern
+     * @param forceStop the force stop
+     * @param soutListener the sout listener
+     * @param serrListener the serr listener
+     */
     protected RedisInstance(final int port, final List<String> args, final Pattern readyPattern,
                             final boolean forceStop, final Consumer<String> soutListener,
                             final Consumer<String> serrListener) {
@@ -43,6 +56,11 @@ public abstract class RedisInstance implements Redis {
         this.serrListener = serrListener;
     }
 
+    /**
+     * Performs the {@code start} operation.
+     *
+     * @throws IOException if the operation fails
+     */
     public synchronized void start() throws IOException {
         if (active) return;
         final File executable = new File(args.get(0));
@@ -127,6 +145,11 @@ public abstract class RedisInstance implements Redis {
         return value == null || value.isEmpty();
     }
 
+    /**
+     * Performs the {@code stop} operation.
+     *
+     * @throws IOException if the operation fails
+     */
     public synchronized void stop() throws IOException {
         removeShutdownHook();
         if (process == null) return;
@@ -165,10 +188,20 @@ public abstract class RedisInstance implements Redis {
         shutdownHook = null;
     }
 
+    /**
+     * Returns whether the active condition holds.
+     *
+     * @return whether the condition holds
+     */
     public boolean isActive() {
         return active;
     }
 
+    /**
+     * Returns the result of {@code ports}.
+     *
+     * @return the result
+     */
     public List<Integer> ports() {
         return Collections.singletonList(port);
     }

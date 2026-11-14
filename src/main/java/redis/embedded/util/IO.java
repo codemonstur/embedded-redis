@@ -14,6 +14,9 @@ import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.createTempDirectory;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
+/**
+ * The {@code IO} enum.
+ */
 public enum IO {;
 
     // Daemon threads used to read process output with a deadline; a binary that never prints its ready-line
@@ -24,12 +27,26 @@ public enum IO {;
         return thread;
     });
 
+    /**
+     * Returns the result of {@code newTempDirForBinary}.
+     *
+     * @return the result
+     * @throws IOException if the operation fails
+     */
     public static File newTempDirForBinary() throws IOException {
         final File tempDirectory = createDirectories(createTempDirectory("redis-")).toFile();
         tempDirectory.deleteOnExit();
         return tempDirectory;
     }
 
+    /**
+     * Returns the result of {@code writeResourceToExecutableFile}.
+     *
+     * @param tempDirectory the temp directory
+     * @param resourcePath the resource path
+     * @return the result
+     * @throws IOException if the operation fails
+     */
     public static File writeResourceToExecutableFile(final File tempDirectory, final String resourcePath) throws IOException {
         final File executable = new File(tempDirectory, resourcePath);
         try (final InputStream in = IO.class.getResourceAsStream(resourcePath)) {
@@ -42,6 +59,12 @@ public enum IO {;
         return executable;
     }
 
+    /**
+     * Returns the result of {@code checkedToRuntime}.
+     *
+     * @param runnable the runnable
+     * @return the result
+     */
     public static Runnable checkedToRuntime(final CheckedRunnable runnable) {
         return () -> {
             try {
@@ -52,10 +75,22 @@ public enum IO {;
         };
     }
 
+    /**
+     * Performs the {@code addShutdownHook} operation.
+     *
+     * @param name the name
+     * @param run the run
+     */
     public static void addShutdownHook(final String name, final Runnable run) {
         Runtime.getRuntime().addShutdownHook(new Thread(run, name));
     }
 
+    /**
+     * Performs the {@code logStream} operation.
+     *
+     * @param stream the stream
+     * @param logConsumer the log consumer
+     */
     public static void logStream(final InputStream stream, final Consumer<String> logConsumer) {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
             String line; while ((line = reader.readLine()) != null) {
@@ -64,12 +99,28 @@ public enum IO {;
         } catch (final IOException ignored) {}
     }
 
+    /**
+     * Returns the result of {@code newDaemonThread}.
+     *
+     * @param run the run
+     * @return the result
+     */
     public static Thread newDaemonThread(final Runnable run) {
         final Thread thread = new Thread(run);
         thread.setDaemon(true);
         return thread;
     }
 
+    /**
+     * Returns the result of {@code findMatchInStream}.
+     *
+     * @param in the in
+     * @param pattern the pattern
+     * @param soutListener the sout listener
+     * @param processOutput the process output
+     * @return whether the condition holds
+     * @throws IOException if the operation fails
+     */
     public static boolean findMatchInStream(final InputStream in, final Pattern pattern
             , final Consumer<String> soutListener, final StringBuilder processOutput) throws IOException {
         // Deliberately not closed on a successful match: the caller keeps reading the process output after
@@ -89,6 +140,14 @@ public enum IO {;
      * Same as {@link #findMatchInStream(InputStream, Pattern, Consumer, StringBuilder)}, but gives up after the
      * given timeout instead of blocking until the stream ends. Returns false on timeout, and closes the stream
      * so the reader thread stops blocking on it.
+     
+     * @param in the in
+     * @param pattern the pattern
+     * @param soutListener the sout listener
+     * @param processOutput the process output
+     * @param timeoutMs the timeout ms
+     * @return whether the condition holds
+     * @throws IOException if the operation fails
      */
     public static boolean findMatchInStream(final InputStream in, final Pattern pattern
             , final Consumer<String> soutListener, final StringBuilder processOutput, final long timeoutMs)
@@ -115,6 +174,13 @@ public enum IO {;
         } catch (final IOException ignored) {}
     }
 
+    /**
+     * Returns the result of {@code readFully}.
+     *
+     * @param in the in
+     * @param listener the listener
+     * @return the result
+     */
     public static String readFully(final InputStream in, final Consumer<String> listener) {
         final StringBuilder ret = new StringBuilder();
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
@@ -126,11 +192,25 @@ public enum IO {;
         return ret.toString();
     }
 
+    /**
+     * Returns the result of {@code processToLines}.
+     *
+     * @param command the command
+     * @return the result
+     * @throws IOException if the operation fails
+     */
     public static Stream<String> processToLines(final String command) throws IOException {
         final Process proc = Runtime.getRuntime().exec(command);
         return new BufferedReader(new InputStreamReader(proc.getInputStream())).lines();
     }
 
+    /**
+     * Returns the result of {@code findBinaryInPath}.
+     *
+     * @param name the name
+     * @return the result
+     * @throws FileNotFoundException if the operation fails
+     */
     public static Path findBinaryInPath(final String name) throws FileNotFoundException {
         return findBinaryInPath(name, System.getenv("PATH"));
     }

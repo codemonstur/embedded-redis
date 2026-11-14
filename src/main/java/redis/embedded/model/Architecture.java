@@ -7,11 +7,28 @@ import java.util.stream.Stream;
 
 import static redis.embedded.util.IO.processToLines;
 
+/**
+ * The {@code Architecture} enum.
+ */
 public enum Architecture {
+    /**
+     * The {@code x86} constant.
+     */
     x86,
+    /**
+     * The {@code x86_64} constant.
+     */
     x86_64,
+    /**
+     * The {@code aarch64} constant.
+     */
     aarch64;
 
+    /**
+     * Returns the result of {@code detectWindowsArchitecture}.
+     *
+     * @return the result
+     */
     public static Architecture detectWindowsArchitecture() {
         final String arch = System.getenv("PROCESSOR_ARCHITECTURE");
         final String wow64Arch = System.getenv("PROCESSOR_ARCHITEW6432");
@@ -19,6 +36,11 @@ public enum Architecture {
         return isWindows64Bit(arch, wow64Arch) ? x86_64 : x86;
     }
 
+    /**
+     * Returns the result of {@code detectUnixMacOSXArchitecture}.
+     *
+     * @return the result
+     */
     public static Architecture detectUnixMacOSXArchitecture() {
         try (final Stream<String> lines = processToLines("uname -m")) {
             return lines.filter(Architecture::isUnix64Bit)
