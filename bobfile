@@ -2,7 +2,7 @@ include https://raw.githubusercontent.com/codemonstur/bobfiles/master/foss-lib-g
 
 vendor: com.github.codemonstur
 name: embedded-redis
-version: 1.4.4
+version: 1.5.0
 packaging: jar
 release: 8
 enablePreview: false

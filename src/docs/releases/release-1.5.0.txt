@@ -1,0 +1,7 @@
+1.5.0
+
+Added OsArchitectureNotFound when no Redis executable is available for the current platform
+Added download and read timeouts when fetching Redis executables
+Download executables to a temporary file and move them atomically into the cache
+Added RedisServerBuilder.settingForNextBuild
+Fixed sentinel configuration handling and resource cleanup in cluster and sharded cluster builders

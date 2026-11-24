@@ -2,7 +2,7 @@ name: Daily validate
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '2 0 * * *'
   workflow_dispatch:
 
 jobs:
@@ -10,11 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '27'
           cache: maven
+      - name: Install Qodana CLI
+        run: |
+          curl -fsSL https://jb.gg/qodana-cli/install | bash -s -- v2026.2.3
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Validate
         run: |
           set -o pipefail

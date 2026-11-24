@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help clean build test coverage validate release-notes deploy build-arm mutation
+.PHONY: help clean build test coverage validate release-notes deploy build-arm mutation qodana
 
 NAME=`xmllint --xpath "//project/artifactId/text()" pom.xml`
 VERSION=`xmllint --xpath "//project/version/text()" pom.xml`
@@ -48,6 +48,19 @@ validate: ## Check dependency versions, cves, licenses, javadoc, and code qualit
 	@mvn verify -P vulnerabilities,licenses -DskipTests -T 1C
 	@mvn validate -P codequality
 	@mvn -DskipTests javadoc:javadoc
+
+qodana: ## Run Qodana static analysis and report
+	@mkdir -p target/qodana
+	@NO_COLOR=1 NONINTERACTIVE=1 qodana scan --linter qodana-jvm-community --print-problems --save-report --results-dir target/qodana --disable-update-checks > target/qodana/qodana.log 2>&1; \
+	status=$$?; \
+	if [ $$status -ne 0 ]; then \
+		echo "Qodana failed (exit $$status); see target/qodana/qodana.log and target/qodana/report/index.html"; \
+		tail -n 50 target/qodana/qodana.log; \
+		exit $$status; \
+	fi; \
+	count=$$(jq '[.runs[].results[]] | length' target/qodana/qodana.sarif.json) || { echo "Could not read target/qodana/qodana.sarif.json"; exit 1; }; \
+	jq -r '.runs[].results[] | "[WARNING] " + (.ruleId // "qodana") + ": " + ((.message.text // "") | gsub("\\s+"; " ")) + " (" + ((.locations[0].physicalLocation.artifactLocation.uri // "unknown") | sub("^file://"; "")) + ":" + ((.locations[0].physicalLocation.region.startLine // 0) | tostring) + ")"' target/qodana/qodana.sarif.json; \
+	echo "Qodana report: target/qodana/report/index.html ($$count problem(s))"
 
 release-notes: ## Write release notes in src/docs/releases for the current version
 	@mkdir -p src/docs/releases
